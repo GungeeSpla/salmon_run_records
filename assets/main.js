@@ -415,7 +415,10 @@ function createLinksHTML(rec) {
 			const url2 = url.split('//')[1];
 			if (url2) {
 				const domain = url2.split('/')[0];
-				const type = LINK_TYPES[domain] || 'chain';
+				let type = LINK_TYPES[domain] || 'chain';
+				if (url.indexOf('?type=video') > -1) {
+					type = 'video';
+				}
 				linksHTML += `<a href="${url}" target="_blank"><img src="./assets/img/link-${type}.png"></a>`;
 			}
 		});
