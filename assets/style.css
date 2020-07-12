@@ -140,8 +140,10 @@ a {
 			text-align: left;
 		}
 	#record-table-area {
-		margin-top: 2em;
-		margin-bottom: 4em;
+		margin-top: 3em;
+		margin-bottom: 3em;
+		background: rgba(0,0,0,.85) url(./img/bg-1.png) top;
+		background-size: 2em 2em;
 	}
 	body.touchdevice #record-table-area {
 		overflow-x: scroll;
@@ -150,13 +152,9 @@ a {
 		overflow-x: inherit;
 	}
 	#record-table-wrapper {
-		background: rgba(0,0,0,.85) url(./img/bg-1.png) top;
-		background-size: 2em 2em;
-		padding: 0 0.2em;
-		margin-bottom: 1em;
+		padding: 1em 0.2em;
 		color: #fff;
 		font-family: Splatoon2, sans-serif;
-		box-shadow: 0.1em 0.1em 0 #000;
 		width: max-content;
 		overflow: hidden;
 		margin: auto;
@@ -167,7 +165,7 @@ a {
 		/* すべてのセル */
 		#record-table th,
 		#record-table td {
-			border: 0.2em solid #000;
+			border: 0.2em solid #150604;
 			border-radius: 1em;
 			text-align: center;
 			vertical-align: middle;
