@@ -18,16 +18,16 @@ const RECORD_NUM_MAX = 1500;
 const ROTATION_NUM_MAX = 800;
 const navigatorLang = navigator.language || navigator.userLanguage || 'ja';
 const queries = (() => {
-  const queryStr = window.location.search.slice(1);
-  const queries = {};
-  if (!queryStr) {
-    return queries;
-  }
-  queryStr.split('&').forEach((queryStr) => {
-    const queryArr = queryStr.split('=');
-    queries[queryArr[0]] = queryArr[1];
-  });
-  return queries;
+	const queryStr = window.location.search.slice(1);
+	const queries = {};
+	if (!queryStr) {
+		return queries;
+	}
+	queryStr.split('&').forEach((queryStr) => {
+		const queryArr = queryStr.split('=');
+		queries[queryArr[0]] = queryArr[1];
+	});
+	return queries;
 })();
 const LANG_KEY = (queries.lang === 'ja') ? 'ja' : (queries.lang === 'en') ? 'en' : (navigatorLang.indexOf('ja') > -1) ? 'ja' : 'en';
 const LANGS = {
@@ -236,9 +236,9 @@ function updateRecordTable(bool) {
 		createdRecords = createRecords();
 	}
 	const tableData = createTableData(createdRecords);
-  const table = document.getElementById('record-table');
-  table.innerHTML = createTableHTML(tableData);
-  const rotations = table.getElementsByClassName('rotation-images');
+	const table = document.getElementById('record-table');
+	table.innerHTML = createTableHTML(tableData);
+	const rotations = table.getElementsByClassName('rotation-images');
 	Array.prototype.forEach.call(rotations, (rotation) => {
 		rotation.addEventListener('click', () => {
 			const id = rotation.getAttribute('rotation-id');
@@ -513,7 +513,7 @@ function createTableHTML(tableData) {
 	return html;
 }
 function saveStorage() {
-  const saveDataObj = {};
+	const saveDataObj = {};
 	const inputs = document.getElementsByClassName('for-save');
 	Array.prototype.forEach.call(inputs, (input) => {
 		const key = input.getAttribute('id');
@@ -521,13 +521,13 @@ function saveStorage() {
 			saveDataObj[key] = input.checked;
 		}
 	});
-  const saveDataJSON = JSON.stringify(saveDataObj);
-  localStorage.setItem(STORAGE_KEY, saveDataJSON);
+	const saveDataJSON = JSON.stringify(saveDataObj);
+	localStorage.setItem(STORAGE_KEY, saveDataJSON);
 }
 function loadStorage() {
-  var saveDataJSON = localStorage.getItem(STORAGE_KEY);
-  if (saveDataJSON !== null) {
-    var saveDataObj = JSON.parse(saveDataJSON);
+	var saveDataJSON = localStorage.getItem(STORAGE_KEY);
+	if (saveDataJSON !== null) {
+		var saveDataObj = JSON.parse(saveDataJSON);
 		const inputs = document.getElementsByClassName('for-save');
 		Array.prototype.forEach.call(inputs, (input) => {
 			input.checked = false;
@@ -538,5 +538,5 @@ function loadStorage() {
 				input.checked = true;
 			}
 		});
-  }
+	}
 }

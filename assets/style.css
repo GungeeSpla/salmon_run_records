@@ -1,27 +1,27 @@
 @import url(https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 @font-face {
-  font-family: Splatoon1;
-  src:
-    url('./woff/s1kanji.woff2') format('woff2'),
-    url('./woff/s1kanji.woff') format('woff');
+	font-family: Splatoon1;
+	src:
+		url('./woff/s1kanji.woff2') format('woff2'),
+		url('./woff/s1kanji.woff') format('woff');
 }
 @font-face {
-  font-family: Splatoon1;
-  src:
-    url('./woff/s1kana.woff2') format('woff2'),
-    url('./woff/s1kana.woff') format('woff');
+	font-family: Splatoon1;
+	src:
+		url('./woff/s1kana.woff2') format('woff2'),
+		url('./woff/s1kana.woff') format('woff');
 }
 @font-face {
-  font-family: Splatoon2;
-  src:
-    url('./woff/s2kanji.woff2') format('woff2'),
-    url('./woff/s2kanji.woff') format('woff');
+	font-family: Splatoon2;
+	src:
+		url('./woff/s2kanji.woff2') format('woff2'),
+		url('./woff/s2kanji.woff') format('woff');
 }
 @font-face {
-  font-family: Splatoon2;
-  src:
-    url('./woff/s2kana.woff2') format('woff2'),
-    url('./woff/s2kana.woff') format('woff');
+	font-family: Splatoon2;
+	src:
+		url('./woff/s2kana.woff2') format('woff2'),
+		url('./woff/s2kana.woff') format('woff');
 }
 body, div, p, table, tr, th, td, ul, ol, li, h1, h2, h3, h4, h5 {
 	margin: 0;
@@ -30,10 +30,10 @@ body, div, p, table, tr, th, td, ul, ol, li, h1, h2, h3, h4, h5 {
 }
 body {
 	text-align: center;
-  background: #9b1e09 url(./img/bg-3.png) top;
-  background-size: 30em 15em;
-  color: #fff;
-  font-family: Splatoon2, sans-serif;
+	background: #9b1e09 url(./img/bg-3.png) top;
+	background-size: 30em 15em;
+	color: #fff;
+	font-family: Splatoon2, sans-serif;
 }
 body.mousedevice {
 	min-width: max-content;
@@ -50,8 +50,8 @@ input[type=checkbox] + label {
 }
 input[type=checkbox] { display:none; }
 input[type=checkbox] + label:before {
-  font-family: "Font Awesome 5 Free";
-  display: inline-block;
+	font-family: "Font Awesome 5 Free";
+	display: inline-block;
 }
 input[type=checkbox] + label:before { content: "\f0c8"; }
 input[type=checkbox] + label:before { letter-spacing: 0.5em; }
@@ -60,8 +60,8 @@ input[type=checkbox]:checked + label:before { content: "\f14a"; color: yellow; }
 
 input[type=radio] { display:none; }
 input[type=radio] + label:before {
-  font-family: "Font Awesome 5 Free";
-  display: inline-block;
+	font-family: "Font Awesome 5 Free";
+	display: inline-block;
 }
 input[type=radio] + label:before { content: "\f111"; }
 input[type=radio] + label:before { letter-spacing: 0.5em; }
@@ -95,7 +95,7 @@ h3:before, h3:after {
 	width: 5em;
 }
 h3:after {
-  background-position: 100%;
+	background-position: 100%;
 }
 
 a {
@@ -118,9 +118,9 @@ a {
 
 
 #content {
-  position: relative;
-  padding-top: 2em;
-  padding-bottom: 4em;
+	position: relative;
+	padding-top: 2em;
+	padding-bottom: 4em;
 }
 	#about {
 		font-size: 1.2em;
@@ -144,10 +144,10 @@ a {
 		margin-bottom: 4em;
 	}
 	body.touchdevice #record-table-area {
-  	overflow-x: scroll;
+		overflow-x: scroll;
 	}
 	body.mousedevice #record-table-area {
-  	overflow-x: inherit;
+		overflow-x: inherit;
 	}
 	#record-table-wrapper {
 		background: rgba(0,0,0,.85) url(./img/bg-1.png) top;
@@ -177,7 +177,7 @@ a {
 		/* 左端のセル */
 		#record-table th:first-child {
 			border-left: none;
-    	max-width: 10em;
+			max-width: 10em;
 		}
 		/* 右端のセル */
 		#record-table th:last-child,
@@ -206,15 +206,15 @@ a {
 			overflow: scroll;
 		}
 		#record-table thead th {
-		  position: -webkit-sticky;
-		  position: sticky;
-		  top: 0;
-		  z-index: 1;
+			position: -webkit-sticky;
+			position: sticky;
+			top: 0;
+			z-index: 1;
 		}
 		#record-table th:first-child {
-		  position: -webkit-sticky;
-		  position: sticky;
-		  left: 0;
+			position: -webkit-sticky;
+			position: sticky;
+			left: 0;
 		}
 		*/
 			#record-table thead th img {
@@ -238,41 +238,41 @@ a {
 				display: block;
 			}
 			#record-table .eggs:before {
-		    display: inline-block;
-		    content: "";
-		    background: url(./img/icon-2.png) 50% no-repeat;
-		    background-repeat: no-repeat;
-		    background-position: 50%;
-		    background-size: contain;
-		    width: 1.2em;
-		    height: 1em;
-		    vertical-align: middle;
+				display: inline-block;
+				content: "";
+				background: url(./img/icon-2.png) 50% no-repeat;
+				background-repeat: no-repeat;
+				background-position: 50%;
+				background-size: contain;
+				width: 1.2em;
+				height: 1em;
+				vertical-align: middle;
 				margin-top: -0.1em;
-    		filter: drop-shadow(0.15em 0.15em 0 #000);
+				filter: drop-shadow(0.15em 0.15em 0 #000);
 			}
 			#record-table .p-eggs:before {
 				display: inline-block;
 				content: "";
-		    background: url(./img/icon-3.png) 50% no-repeat;
+				background: url(./img/icon-3.png) 50% no-repeat;
 				background-repeat: no-repeat;
 				background-position: 50%;
 				background-size: contain;
-		    width: 1.2em;
-		    height: 1em;
+				width: 1.2em;
+				height: 1em;
 				vertical-align: middle;
 				margin-top: -0.1em;
 			}
 				#record-table .p-eggs .num:before,
 				#record-table .eggs .num:before {
-			    content: "X";
-			    font-size: 0.6em;
-			    margin: 0 0.1em;
+					content: "X";
+					font-size: 0.6em;
+					margin: 0 0.1em;
 				}
 			#record-table .rotation-images {
 				display: none;
 				list-style-type: none;
 				justify-content: center;
-    		cursor: pointer;
+				cursor: pointer;
 			}
 			#record-table.visible-rotation .rotation-images {
 				display: flex;
@@ -342,11 +342,11 @@ a {
 	display: none;
 }
 	#modal-footer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 3em;
-    cursor: pointer;
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 3em;
+		cursor: pointer;
 	}
 	#modal-rotation {
 		background: rgba(10,10,10,1) url(./img/bg-1.png) top;
@@ -359,12 +359,12 @@ a {
 		box-shadow: 0.1em 0.1em 0 #000;
 		width: max-content;
 		height: max-content;
-    position: absolute;
-    margin: auto;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+		position: absolute;
+		margin: auto;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
 	}
 		/*
 		#modal-rotation h5:before {
