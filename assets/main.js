@@ -437,12 +437,14 @@ function createRecords() {
 	['normal', 'green-mystery-one', 'green-mystery-all', 'golden-mystery'].forEach((key) => {
 		cacheKey += (checked[`rotation-${key}`]) ? '1' : '0';
 	});
+	/*
 	if (cacheKey in createdRecordsCache) {
 		console.log('現在選択中の編成の組み合わせはレコードを生成済みです。');
 		return createdRecordsCache[cacheKey];
 	} else {
 		console.log('選択した編成の組み合わせでレコードを生成しています…');
 	}
+	*/
 	for (let i = 0; i < RECORDS.length; i++) {
 		const rec = RECORDS[i];
 		if ('ties' in rec) {
