@@ -71,7 +71,7 @@ input[type=radio]:checked + label:before { content: "\f192"; color: yellow; }
 h3 {
 	position: relative;
 	font-family: Splatoon1, sans-serif;
-	font-size: 1em;
+	font-size: 1.2em;
 	color: #ff5033;
 	z-index: 1;
 }
@@ -122,12 +122,15 @@ a {
   padding-top: 2em;
   padding-bottom: 4em;
 }
+	#about {
+		font-size: 1.2em;
+	}
 	.ul-options {
 		display: inline-flex;
 		width: 100%;
 		list-style-type: none;
 		max-width: 22em;
-		font-size: 0.9em;
+		font-size: 1.2em;
 		flex-wrap: wrap;
 	}
 		.ul-options li {
