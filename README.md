@@ -6,6 +6,7 @@ Salmon Run Recordsの閲覧用のページです。
 ## 閲覧リンク
 
 以下のリンクから閲覧できます。
+
 [https://gungeespla.github.io/salmon_run_records/](https://gungeespla.github.io/salmon_run_records/)
 
 ## 関連リンク
