@@ -454,7 +454,7 @@ function createRecords() {
 		if ('ties' in rec) {
 			delete rec.ties;
 		}
-		if (isNaN(parseInt(rec['stage-id']))) {
+		if (isNaN(parseInt(rec['stage-id'])) || isNaN(parseInt(rec['record-id'])) || isNaN(parseInt(rec['eggs']))) {
 			break;
 		}
 		const rotationId = parseInt(rec['rotation-id']);
