@@ -64,6 +64,7 @@ const LINK_TYPES = {
 	'salmon-stats.yuki.games': 'chain',
 	'twitter.com': 'twitter',
 	'clips.twitch.tv': 'video',
+	'www.twitch.tv': 'video',
 	'www.openrec.tv': 'video',
 	'www.youtube.com': 'video',
 	'youtu.be': 'video',
