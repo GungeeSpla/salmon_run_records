@@ -106,6 +106,13 @@ text-decoration: none;
 }
 a:hover {
 color: #2fe3be;
+text-decoration: underline #2fe3be;
+}
+a:hover .golden-egg {
+text-decoration: underline #f1c40f;
+}
+a:hover .power-egg {
+text-decoration: underline #e67e22;
 }
 .golden-egg {
 color: #f1c40f;

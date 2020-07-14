@@ -184,7 +184,7 @@ async function init() {
 	*/
 	WEAPON_TYPE_NAMES.forEach((weaponTypeName) => {
 		const h3 = document.createElement('h3');
-		h3.textContent = `${weaponTypeName} x 全ステージ`;
+		h3.textContent = `${weaponTypeName}`;
 		content.appendChild(h3);
 		const div = document.createElement('div');
 		let html = '<table class="stats-b"><thead><tr><th></th><th>シェケナダム</th><th>難破船ドン・ブラコ</th><th>海上集落シャケト場</th><th>トキシラズいぶし工房</th><th>朽ちた箱舟 ポラリス</th></tr></thead><tbody>';
