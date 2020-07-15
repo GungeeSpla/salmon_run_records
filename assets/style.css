@@ -102,6 +102,10 @@ a {
 	color: #FFEB3B;
 	text-decoration: none;
 }
+a:hover {
+	color: #FFEB3B;
+	text-decoration: #FFEB3B underline;
+}
 
 
 
@@ -124,6 +128,14 @@ a {
 }
 	#about {
 		font-size: 1.2em;
+    width: 22em;
+    margin: auto;
+    text-align: left;
+	}
+	#about p {
+    line-height: 1.5em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
 	}
 	.ul-options {
 		display: inline-flex;

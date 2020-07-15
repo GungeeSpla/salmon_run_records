@@ -3,6 +3,13 @@ google.load('visualization', '1');
 const URL_BASE = 'http://spreadsheets.google.com/tq';
 const SHEET_KEY = '17NzDT1-M-p5fC9jKrTTQrufF_HqrYZGLya-sHHOO2bE';
 const IGNORE_ROTATION_IDS = [488];
+const STAGE_IDS = {
+	'シェケナダム': 0,
+	'難破船ドン・ブラコ': 1,
+	'海上集落シャケト場': 2,
+	'トキシラズいぶし工房': 3,
+	'朽ちた箱舟 ポラリス': 4,
+};
 const STAGE_NAMES = [
 	'シェケナダム',
 	'難破船ドン・ブラコ',
@@ -40,6 +47,25 @@ const RECORD_KEYS = [
 	'満潮ハコビヤ',
 	'満潮ラッシュ',
 ];
+const RECORD_IDS = {
+	'総合': 0,
+	'通常昼': 8,
+	'満潮昼': 9,
+	'干潮昼': 10,
+	'通常ラッシュ': 11,
+	'満潮ラッシュ': 12,
+	'通常霧': 13,
+	'満潮霧': 14,
+	'干潮霧': 15,
+	'通常間欠泉': 16,
+	'満潮間欠泉': 17,
+	'通常グリル': 18,
+	'満潮グリル': 19,
+	'通常ハコビヤ': 20,
+	'満潮ハコビヤ': 21,
+	'干潮ハコビヤ': 22,
+	'干潮ドスコイ': 23,
+};
 const RECORD_KEYS_2 = [
 	'総合',
 	'通常昼',
@@ -126,13 +152,31 @@ async function init() {
 					const url = record[`${key}URL`];
 					if (!(key in statsRecords[stageWeaponType])) {
 						statsRecords[stageWeaponType][key] = {
+							id: -1,
 							num: -1,
 							url: '',
 						};
 					}
-					if (num > statsRecords[stageWeaponType][key].num) {
-						statsRecords[stageWeaponType][key].num = num;
-						statsRecords[stageWeaponType][key].url = url;
+					if (parseInt(num) > parseInt(statsRecords[stageWeaponType][key].num)) {
+						statsRecords[stageWeaponType][key] = {
+							num: num,
+							url: url,
+							rotation: id,
+						};
+					} else if (parseInt(num) === parseInt(statsRecords[stageWeaponType][key].num)) {
+						if ('ties' in statsRecords[stageWeaponType][key]) {
+							statsRecords[stageWeaponType][key].ties.push({
+								num: num,
+								url: url,
+								rotation: id,
+							});
+						} else {
+							statsRecords[stageWeaponType][key].ties = [{
+								num: num,
+								url: url,
+								rotation: id,
+							}];
+						}
 					}
 				}
 			});
@@ -216,5 +260,87 @@ async function init() {
 		div.innerHTML = html;
 		content.appendChild(div);
 	});
+	const arrs = [];
+	STAGE_NAMES.forEach((stageName) => {
+		WEAPON_TYPE_NAMES.forEach((weaponTypeName) => {
+			RECORD_KEYS_2.forEach((key) => {
+				const statsRecordsKey = `${stageName} ${weaponTypeName}`;
+				if (statsRecordsKey in statsRecords) {
+					const record = statsRecords[statsRecordsKey];
+					const key1 = key + '(金)';
+					const key2 = key + '(赤)';
+					if (key1 in record) {
+						const rec1 = record[key1];
+						const rec2 = record[key2];
+						const arr1 = [
+							'2020/7/15',
+							STAGE_IDS[stageName],
+							RECORD_IDS[key],
+							rec1.num,
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							'',
+							rec1.url,
+							rec1.rotation,
+						];
+						arrs.push(arr1);
+						if ('ties' in rec1) {
+							rec1.ties.forEach((tie) => {
+								arrs.push([
+									'2020/7/15',
+									STAGE_IDS[stageName],
+									RECORD_IDS[key],
+									tie.num,
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+									'',
+									tie.url,
+									tie.rotation,
+								]);
+							});
+						}
+						if (key1 === '総合') {
+							const arr2 = [
+								'2020/7/15',
+								STAGE_IDS[stageName],
+								24,
+								rec2.num,
+								'',
+								'',
+								'',
+								'',
+								'',
+								'',
+								'',
+								rec2.url,
+								rec2.rotation,
+							];
+							arrs.push(arr2);
+						}
+					}
+				}
+			});
+		});
+	});
+	const div = document.createElement('div');
+	let html = '<table>';
+	arrs.forEach((arr) => {
+		html += '<tr>';
+		arr.forEach((td) => {
+			html += `<td>${td}</td>`;
+		});
+		html += '</tr>';
+	});
+	html += '</table>';
+	div.innerHTML = html;
+	content.appendChild(div);
 	return;
 }
