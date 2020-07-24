@@ -2,6 +2,7 @@
 google.load('visualization', '1');
 // https://docs.google.com/spreadsheets/d/1v-OCTcqyj_mEgxityyfAWCfT2_2IueRrtsGItYPZCMU/edit?usp=sharing
 const URL_BASE = 'http://spreadsheets.google.com/tq';
+const URL_BASE_2 = 'https://docs.google.com/spreadsheets/d';
 const SHEET_KEY = '1v-OCTcqyj_mEgxityyfAWCfT2_2IueRrtsGItYPZCMU';
 const STAGE_DEFINE = {"0":{"id":"0","ja":"シェケナダム","en":"Spawning Grounds"},"1":{"id":"1","ja":"難破船ドン･ブラコ","en":"Marooner's Bay"},"2":{"id":"2","ja":"海上集落シャケト場","en":"Lost Outpost"},"3":{"id":"3","ja":"トキシラズいぶし工房","en":"Salmonid Smokeyard"},"4":{"id":"4","ja":"朽ちた箱舟 ポラリス","en":"Ruins of Ark Polaris"}};
 const RECORD_DEFINE = {"0":{"id":"0","ja":"総合金","en":"Total Golden Eggs"},"1":{"id":"1","ja":"総合金（昼のみ）","en":"Total Golden Eggs (No Night)"},"2":{"id":"2","ja":"1WAVE最高金","en":"1-Wave Golden Eggs"},"3":{"id":"3","ja":"個人金","en":"Single Player Golden Eggs"},"4":{"id":"4","ja":"野良3総合金","en":"Total Golden Eggs in Freelance"},"5":{"id":"5","ja":"野良3個人金","en":"Single Player Golden Eggs in Freelance"},"6":{"id":"6","ja":"野良2総合金","en":"Total Golden Eggs in Twinlance"},"7":{"id":"7","ja":"野良2個人金","en":"Single Player Golden Eggs in Twinlance"},"8":{"id":"8","ja":"通常昼","en":"NT Normal"},"9":{"id":"9","ja":"満潮昼","en":"HT Normal"},"10":{"id":"10","ja":"干潮昼","en":"LT Normal"},"11":{"id":"11","ja":"通常ラッシュ","en":"NT Rush"},"12":{"id":"12","ja":"満潮ラッシュ","en":"HT Rush"},"13":{"id":"13","ja":"通常霧","en":"NT Fog"},"14":{"id":"14","ja":"満潮霧","en":"HT Fog"},"15":{"id":"15","ja":"干潮霧","en":"LT Fog"},"16":{"id":"16","ja":"通常間欠泉","en":"NT Goldie Seeking"},"17":{"id":"17","ja":"満潮間欠泉","en":"HT Goldie Seeking"},"18":{"id":"18","ja":"通常グリル","en":"NT Grillers"},"19":{"id":"19","ja":"満潮グリル","en":"HT Grillers"},"20":{"id":"20","ja":"通常ハコビヤ","en":"NT Mothership"},"21":{"id":"21","ja":"満潮ハコビヤ","en":"HT Mothership"},"22":{"id":"22","ja":"干潮ハコビヤ","en":"LT Mothership"},"23":{"id":"23","ja":"干潮ドスコイ","en":"Cohock Charge"},"24":{"id":"24","ja":"総合赤","en":"Total Power Eggs"},"25":{"id":"25","ja":"個人赤","en":"Single Player Power Eggs"},"26":{"id":"26","ja":"野良3総合赤","en":"Total Power Eggs in Freelance"},"27":{"id":"27","ja":"野良3個人赤","en":"Single Player Power Eggs in Freelance"},"28":{"id":"28","ja":"野良2総合赤","en":"Total Power Eggs in Twinlance"}};
@@ -57,7 +58,8 @@ const LINK_TYPES = {
  */
 function getSheet(param) {
 	return new Promise((resolve) => {
-		const url = encodeURI(`${URL_BASE}?key=${param.key}&sheet=${param.sheet}&range=${param.range}`);
+		//const url = encodeURI(`${URL_BASE}?key=${param.key}&sheet=${param.sheet}&range=${param.range}`);
+		const url = encodeURI(`${URL_BASE_2}/${param.key}/gviz/tq?sheet=${param.sheet}&range=${param.range}`);
 		const query = new google.visualization.Query(url);
 		query.setRefreshable(false);
 		query.send(function(response){
@@ -184,7 +186,7 @@ async function init() {
 	// await getDefine();
 	let rotationCount = 0;
 	let recordCount = 0;
-	await getCSV({
+	await getSheet({
 		key: SHEET_KEY,
 		sheet: 'Count',
 		range: 'A1:B2',
@@ -193,7 +195,7 @@ async function init() {
 			recordCount = parseInt(lines[0]['record count']);
 		},
 	})
-	await getCSV({
+	await getSheet({
 		key: SHEET_KEY,
 		sheet: 'Records',
 		range: `A1:M${recordCount+1}`,
@@ -203,7 +205,7 @@ async function init() {
 			console.log('レコードを取得しました。');
 		},
 	});
-	await getCSV({
+	await getSheet({
 		key: SHEET_KEY,
 		sheet: 'Rotations',
 		range: `A2:K${rotationCount+2}`,
