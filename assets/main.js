@@ -182,9 +182,9 @@ async function init() {
 	});
 	console.log('シートにアクセスしています…');
 	// await getDefine();
-	let rotationCount;
-	let recordCount;
-	await getSheet({
+	let rotationCount = 0;
+	let recordCount = 0;
+	await getCSV({
 		key: SHEET_KEY,
 		sheet: 'Count',
 		range: 'A1:B2',
@@ -192,21 +192,23 @@ async function init() {
 			rotationCount = parseInt(lines[0]['rotation count']);
 			recordCount = parseInt(lines[0]['record count']);
 		},
-	});
-	await getSheet({
+	})
+	await getCSV({
 		key: SHEET_KEY,
 		sheet: 'Records',
 		range: `A1:M${recordCount+1}`,
 		callback: (lines) => {
+			console.log(lines);
 			RECORDS = lines;
 			console.log('レコードを取得しました。');
 		},
 	});
-	await getSheet({
+	await getCSV({
 		key: SHEET_KEY,
 		sheet: 'Rotations',
 		range: `A2:K${rotationCount+2}`,
 		callback: (lines) => {
+			console.log(lines);
 			ROTATIONS = lines;
 			console.log('編成履歴を取得しました。');
 		},
@@ -342,8 +344,8 @@ function createRecords() {
 		// ステージID、レコードID、スコアのいずれかひとつでも数値に変換できなければこのレコードは無効
 		// for文を抜けてしまっていい
 		if (isNaN(parseInt(rec['stage id'])) ||
-		    isNaN(parseInt(rec['record id'])) ||
-		    isNaN(parseInt(rec['score']))) {
+				isNaN(parseInt(rec['record id'])) ||
+				isNaN(parseInt(rec['score']))) {
 			break;
 		}
 		// 編成種別を取得
@@ -353,22 +355,22 @@ function createRecords() {
 			ROTATION_KIND_UNKNOWN);
 		// 金ランダム編成にチェックが入っておらず、このレコードが金ランダム編成のものならば、無視
 		if (!checked['rotation-golden-mystery'] &&
-		    rotationKind === ROTATION_KIND_GOLDEN_MYSTERY) {
+				rotationKind === ROTATION_KIND_GOLDEN_MYSTERY) {
 			continue;
 		}
 		// 一緑ランダム編成にチェックが入っておらず、このレコードが一緑ランダム編成のものならば、無視
 		if (!checked['rotation-green-mystery-one'] &&
-		    rotationKind === ROTATION_KIND_GREEN_MYSTERY_ONE) {
+				rotationKind === ROTATION_KIND_GREEN_MYSTERY_ONE) {
 			continue;
 		}
 		// 全緑ランダム編成にチェックが入っておらず、このレコードが全緑ランダム編成のものならば、無視
 		if (!checked['rotation-green-mystery-all'] &&
-		    rotationKind === ROTATION_KIND_GREEN_MYSTERY_ALL) {
+				rotationKind === ROTATION_KIND_GREEN_MYSTERY_ALL) {
 			continue;
 		}
 		// 通常編成にチェックが入っておらず、このレコードが通常編成（あるいは編成不明）のものならば、無視
 		if (!checked['rotation-normal'] &&
-		   (rotationKind === ROTATION_KIND_NORMAL || rotationKind === ROTATION_KIND_UNKNOWN)) {
+			 (rotationKind === ROTATION_KIND_NORMAL || rotationKind === ROTATION_KIND_UNKNOWN)) {
 			continue;
 		}
 		// ステージID+レコードIDでキーを作成
@@ -568,4 +570,69 @@ function loadStorage() {
 			}
 		});
 	}
+}
+function alphabet2int(str) {
+	const charCodeA = 'a'.charCodeAt(0);
+	const lower = str.toLowerCase();
+	let sum = 0;
+	for (let i = 0; i < lower.length; i++) {
+		const a = lower[i];
+		const b = a.charCodeAt(0) - charCodeA + 1;
+		const c = b * Math.pow(26, i);
+		sum += c;
+	}
+	return sum;
+}
+/** getCSV(opt)
+ */
+function getCSV(opt) {
+	return new Promise((resolve) => {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', `./assets/csv/${opt.sheet}.csv`, true);
+		xhr.responseType = 'text';
+		xhr.onreadystatechange = function (event) {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					var data = xhr.responseText;
+					const ranges = opt.range.split(':');
+					const startCell = ranges[0];
+					const endCell = ranges[1];
+					const startX = alphabet2int(startCell.replace(/[0-9]*/g, '')) - 1;
+					const startY = parseInt(startCell.replace(/[a-zA-Z]*/g, '')) - 1;
+					const endX = alphabet2int(endCell.replace(/[0-9]*/g, '')) - 1;
+					const endY = parseInt(endCell.replace(/[a-zA-Z]*/g, '')) - 1;
+					const rows = data.split('\n');
+					const keys = rows[startY].split(',');
+					for (let x = 0; x < keys.length; x++) {
+						keys[x] = keys[x].trim();
+					}
+					const lines = [];
+					for (let y = startY + 1; y <= endY; y++) {
+						const obj = {};
+						let rowstr = '';
+						let isQuote = false;
+						for (let i = 0; i < rows[y].length; i++) {
+							let c = rows[y][i];
+							if (c === '"') isQuote = !isQuote;
+							if (isQuote) c = '::';
+							rowstr += c;
+						}
+						const row = rowstr.split(',');
+						for (let x = startX; x <= endX; x++) {
+							obj[keys[x]] = row[x].replace(/::/g, ',');
+						}
+						lines.push(obj);
+					}
+					if (opt.callback) opt.callback(lines);
+					resolve();
+				} else {
+					if (opt.error) opt.error();
+				}
+			}
+		};
+		xhr.onerror = function (event) {
+			if (opt.error) opt.error();
+		};
+		xhr.send(null);
+	});
 }
