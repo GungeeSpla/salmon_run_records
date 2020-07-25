@@ -11,6 +11,11 @@ const STAGE_COUNT = 5;
 const STORAGE_KEY = 'salmon-run-records';
 const IGNORE_RECORD_IDS = [2];
 const POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28];
+const UPDATE_TOGETHER = {
+	'26': 24,
+	'27': 25,
+	'28': 24,
+};
 const RECORD_COUNT = 29;
 const ROTATION_KIND_NORMAL = 0;
 const ROTATION_KIND_GREEN_MYSTERY_ONE = 1;
@@ -378,29 +383,35 @@ function createRecords() {
 		// ステージID+レコードIDでキーを作成
 		const stageId = rec['stage id'];
 		const recordId = rec['record id'];
-		const key = `${stageId}-${recordId}`;
-		// そのキーのプロパティがレコードデータにすでに存在するかどうか
-		if (key in records) {
-			// プロパティがレコードデータにすでに存在するならば
-			// スコアを比較する
-			const newEggs = parseInt(rec.score);
-			const oldEggs = parseInt(records[key].score);
-			if (newEggs > oldEggs) {
-				// 更新していれば置換する
-				records[key] = rec;
-			} else if (newEggs === oldEggs) {
-				// タイ記録ならばtiesプロパティに配列を作って格納する
-				// あるいはすでに存在しているties配列にpushする
-				if ('ties' in records[key]) {
-					records[key].ties.push(rec);
-				} else {
-					records[key].ties = [rec];
-				}
-			}
-		} else {
-			// プロパティがまだ存在していないならば単に代入する
-			records[key] = rec;
+		const key1 = `${stageId}-${recordId}`;
+		const keys = [key1];
+		if (recordId in UPDATE_TOGETHER) {
+			keys.push(`${stageId}-${UPDATE_TOGETHER[recordId]}`);
 		}
+		keys.forEach((key) => {
+			// そのキーのプロパティがレコードデータにすでに存在するかどうか
+			if (key in records) {
+				// プロパティがレコードデータにすでに存在するならば
+				// スコアを比較する
+				const newEggs = parseInt(rec.score);
+				const oldEggs = parseInt(records[key].score);
+				if (newEggs > oldEggs) {
+					// 更新していれば置換する
+					records[key] = rec;
+				} else if (newEggs === oldEggs) {
+					// タイ記録ならばtiesプロパティに配列を作って格納する
+					// あるいはすでに存在しているties配列にpushする
+					if ('ties' in records[key]) {
+						records[key].ties.push(rec);
+					} else {
+						records[key].ties = [rec];
+					}
+				}
+			} else {
+				// プロパティがまだ存在していないならば単に代入する
+				records[key] = rec;
+			}
+		});
 	}
 	return records;
 }
