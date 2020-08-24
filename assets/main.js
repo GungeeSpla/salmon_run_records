@@ -46,6 +46,7 @@ const FQDN_ICON_TYPES = {
 	'pbs.twimg.com': 'image',
 	'ton.twitter.com': 'image',
 	'www.reddit.com': 'image',
+	'media.discordapp.net': 'image',
 	'salmon-stats.yuki.games': 'chain',
 	'twitter.com': 'twitter',
 	'clips.twitch.tv': 'video',
