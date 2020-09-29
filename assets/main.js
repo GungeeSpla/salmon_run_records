@@ -409,17 +409,23 @@ function getLinksHTML(rec) {
 		urls.forEach((item) => {
 			// スペースなどをトリムする
 			const url = item.trim();
-			// 「//」の後を取得する
-			const url2 = url.split('//')[1];
-			if (url2) {
-				// FQDN部分を取得する
-				const fqdn = url2.split('/')[0];
-				// クエリパラメータを取得する
-				const queries = getQueries(url);
-				// アイコンタイプを決定する
-				const type = queries.type || FQDN_ICON_TYPES[fqdn] || 'chain';
-				if (type !== 'none') {
-					linksHTML += `<a href="${url}" target="_blank"><img src="./assets/img/link-${type}.png"></a>`;
+			if (url.indexOf('http://') > -1 || url.indexOf('https://') > -1) { 
+				// 「//」の後を取得する
+				const url2 = url.split('//')[1];
+				if (url2) {
+					// FQDN部分を取得する
+					const fqdn = url2.split('/')[0];
+					// クエリパラメータを取得する
+					const queries = getQueries(url);
+					// アイコンタイプを決定する
+					const type = queries.type || FQDN_ICON_TYPES[fqdn] || 'chain';
+					// プレイヤー
+					const title = (!queries.player) ? '' :
+						(LANG_KEY === 'ja') ? queries.player + '視点' :
+						 queries.player + '\'s POV';
+					if (type !== 'none') {
+						linksHTML += `<a href="${encodeURI(url)}" title="${title}" target="_blank"><img src="./assets/img/link-${type}.png"></a>`;
+					}
 				}
 			}
 		});
