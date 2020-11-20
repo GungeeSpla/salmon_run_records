@@ -186,12 +186,25 @@
 		return this;
 	};
 	
-	/** .getRecords()
+	/** .getRecords(_rotationType)
+	 * Spreadsheetから引っ張ってきた、過去すべての生のRecordオブジェクトが格納されている
+	 * 配列(rowRecords)を使用して、実際にSalmon Run Recordsとして表示するテーブルデータを作成します。
+	 * その際、4つの編成種別のうちチェックの入っていない編成種別は無視します。
+	 * 
+	 * @param _rotationType {Object} - どの編成種別を有効にするかの設定。 
+	 *     たとえば、{ 'rotation-normal': true, 'rotation-green-mystery-one': true }
+	 *
+	 * @return {Object} - "ステージID-レコードID"、たとえばダム-通常昼なら"0-8"、
+	 *     ポラ-通常ハコビヤなら"4-20"、といったキーにRecordオブジェクトが格納されたオブジェクト。
+	 *     格納されている各オブジェクトは、生のRecordオブジェクトにはなかった"ties"プロパティを持つ場合があります。
+	 *     これはタイ記録であるRecordオブジェクトがすべて格納されている配列です。
 	 */
 	SRRManager.prototype.getRecords = function(_rotationType) {
 
+		// 最終的に表示するデータ
 		const records = {};
 
+		// オプションを初期値に統合
 		const rotationType = Object.assign({
 			'rotation-normal': false,
 			'rotation-green-mystery-one': false,
