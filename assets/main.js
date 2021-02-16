@@ -1,71 +1,96 @@
-'use strict';
+/** STORAGE_KEY
+ * localStorageに保存する際に使用するキー
+ */
+var STORAGE_KEY = 'salmon-run-records';
 
-// localStorageに保存する際に使用するキー
-const STORAGE_KEY = 'salmon-run-records';
+/** NAVIGATOR_LANG
+ * navigatorの言語
+ */
+var NAVIGATOR_LANG = navigator.language || navigator.userLanguage || 'ja';
 
-// navigatorの言語
-const NAVIGATOR_LANG = navigator.language || navigator.userLanguage || 'ja';
+/** LOCATION_QUERIES
+ * locationのクエリパラメータ
+ */
+var LOCATION_QUERIES = getQueries();
 
-// locationのクエリパラメータ
-const LOCATION_QUERIES = getQueries();
+/** LANG_KEY
+ * locationのクエリパラメータもしくはnavigatorから言語を日本語か英語のどちらかひとつに決定
+ */
+var LANG_KEY = (LOCATION_QUERIES.lang === 'ja') ? 'ja' : (LOCATION_QUERIES.lang === 'en') ? 'en' : (NAVIGATOR_LANG.indexOf('ja') > -1) ? 'ja' : 'en';
 
-// locationのクエリパラメータもしくはnavigatorから言語を日本語か英語のどちらかひとつに決定
-const LANG_KEY = (LOCATION_QUERIES.lang === 'ja')
-	? 'ja'
-	: (LOCATION_QUERIES.lang === 'en')
-		? 'en'
-		: (NAVIGATOR_LANG.indexOf('ja') > -1)
-			? 'ja'
-			: 'en';
+/** STAGE_COUNT
+ * ステージの数
+ */
+var STAGE_COUNT = 5;
 
-// 無視するレコードID
-// 「1WAVE最高」の記録は無視してもいいかな
-const IGNORE_RECORD_IDS = [2];
-
-// ステージの数
-const STAGE_COUNT = 5;
-
-// 種目の数
-const RECORD_COUNT = 29;
-
-const RECORD_ORDER = [
+/** RECORD_ORDER
+ * 表示する記録カテゴリのリスト
+ */
+var RECORD_ORDER = [
 	0, 1, 3, 29, 4, 5, 6, 7, 8, 9, 10,
 	11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
 	21, 22, 23, 24, 25, 26, 27, 28,
 ];
 
-// 赤イクラ記録の種目IDたち
-// これに該当する種目は、イクラの前に赤イクラアイコンを付ける
-const POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28];
+/** DEFAULT_SAVEDATA
+ * デフォルトのセーブデータ
+ */
+var DEFAULT_SAVEDATA = {
+	'display-item-eggs': true,
+	'display-item-links': true,
+	'display-item-members': true,
+	'display-item-rotation': true,
+	'display-item-ties': true,
+	'radio-stage-0': false,
+	'radio-stage-1': false,
+	'radio-stage-2': false,
+	'radio-stage-3': false,
+	'radio-stage-4': false,
+	'radio-stage-all': true,
+	'rotation-golden-mystery': false,
+	'rotation-green-mystery-all': false,
+	'rotation-green-mystery-one': false,
+	'rotation-normal': true
+};
 
-// リンクのドメインごとに表示する画像を決める
-const FQDN_ICON_TYPES = {
+/** POWER_EGGS_RECORD_IDS
+ * 赤イクラ記録の種目IDたち
+ * これに該当する種目は、イクラの前に赤イクラアイコンを付ける
+ */
+var POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28];
+
+/** FQDN_ICON_TYPES
+ * リンクのドメインごとに表示する画像を決める
+ */
+var FQDN_ICON_TYPES = {
 	'cdn.discordapp.com': 'image',
 	'ibb.co': 'image',
 	'imgur.com': 'image',
 	'pbs.twimg.com': 'image',
 	'ton.twitter.com': 'image',
-	'www.reddit.com': 'image',
+	'reddit.com': 'image',
 	'media.discordapp.net': 'image',
 	'salmon-stats.yuki.games': 'chain',
 	'twitter.com': 'twitter',
-	'clips.twitch.tv': 'video',
-	'www.twitch.tv': 'video',
-	'www.openrec.tv': 'video',
-	'www.youtube.com': 'video',
+	'clips.twitch.tv': 'twitch',
+	'twitch.tv': 'twitch',
+	'openrec.tv': 'openrec',
+	'youtube.com': 'video',
 	'youtu.be': 'video',
-	'www.nicovideo.jp': 'video',
+	'nicovideo.jp': 'niconico',
 };
 
-// 何回もアクセスすることになるであろうDOM要素への参照
-let $recordTable;
-let $forSave;
-let srrManager;
-
-/** initialize()
+/**
+ * 何回もアクセスすることになるであろうDOM要素への参照
  */
-async function initialize() {
-	console.log('ページの読み込みが完了しました。');
+var $recordTable;
+var $forSave;
+var srrManager;
+
+/** DOMContentLoaded
+ */
+window.addEventListener('DOMContentLoaded', function() {
+	console.log('Event: DOMContentLoaded');
 
 	// レコードテーブル要素を取得
 	$recordTable = document.getElementById('record-table');
@@ -76,15 +101,21 @@ async function initialize() {
 
 	// 各DOM要素にイベントを設定したり初期値を設定したりする
 	initializeDOMElements();
+});
+
+/** load
+ */
+window.addEventListener('load', function() {
+	console.log('Event: load');
 
 	// スプレッドシートにアクセス
-	srrManager = new SRRManager();
-	await srrManager.init();
-	console.log('テーブルを作成しています…');
-	updateRecordTable();
-	console.log('テーブルを作成しました。');
-	return;
-}
+	srrManager = new window.SRRManager();
+	srrManager.init(function() {
+		console.log('テーブルを作成しています…');
+		updateRecordTable();
+		console.log('テーブルを作成しました。');
+	});
+});
 
 
 /** initializeDOMElements()
@@ -98,29 +129,29 @@ function initializeDOMElements() {
 	}
 
 	// モーダルウィンドウをクリックしたらモーダルウィンドウを閉じる
-	document.getElementById('modal').addEventListener('click', () => {
-		modal.classList.add('hidden');
+	document.getElementById('modal').addEventListener('click', function() {
+		document.getElementById('modal').classList.add('hidden');
 	});
 
 	// モーダルウィンドウ中の要素をクリックしても上のイベントが呼ばれないようにする
-	document.getElementById('modal-rotation').addEventListener('click', (e) => {
+	document.getElementById('modal-rotation').addEventListener('click', function(e) {
 		e.stopPropagation();
 	});
 
 	// 言語設定が英語なら翻訳対象のDOM要素をすべて翻訳する
 	if (LANG_KEY === 'en') {
-		const $transElements = document.getElementsByClassName('for-translation');
-		Array.prototype.forEach.call($transElements, ($elm) => {
-			const txt = $elm.getAttribute('en-text');
+		var $transElements = document.getElementsByClassName('for-translation');
+		Array.prototype.forEach.call($transElements, function($elm) {
+			var txt = $elm.getAttribute('en-text');
 			$elm.textContent = txt;
 		});
 	}
 
 	// 値が変更されたときレコードテーブルを更新しなければならないような
 	// <input>要素すべてにイベントを仕込む
-	const $inputs = document.getElementsByClassName('for-update-table');
-	Array.prototype.forEach.call($inputs, ($input) => {
-		$input.addEventListener('change', () => {
+	var $inputs = document.getElementsByClassName('for-update-table');
+	Array.prototype.forEach.call($inputs, function($input) {
+		$input.addEventListener('change', function() {
 			updateRecordTable();
 			console.log('テーブルを更新しました。');
 		});
@@ -128,10 +159,10 @@ function initializeDOMElements() {
 
 	// 値が変更されたときレコードテーブルのクラスを付け替えなければならないような
 	// <input>要素すべてにイベントを仕込む
-	const $inputs2 = document.getElementsByClassName('for-update-table-class');
-	Array.prototype.forEach.call($inputs2, ($input) => {
-		const toggleClass = $input.getAttribute('toggle-class');
-		const update = () => {
+	var $inputs2 = document.getElementsByClassName('for-update-table-class');
+	Array.prototype.forEach.call($inputs2, function($input) {
+		var toggleClass = $input.getAttribute('toggle-class');
+		var update = function() {
 			if ($input.checked) {
 				$recordTable.classList.add(toggleClass);
 			} else {
@@ -144,9 +175,9 @@ function initializeDOMElements() {
 
 	// 値が変更されたときlocalStorageにセーブしなければならないような
 	// <input>要素すべてにイベントを仕込む
-	const $saveInputs = $forSave;
-	Array.prototype.forEach.call($saveInputs, ($input) => {
-		$input.addEventListener('change', () => {
+	var $saveInputs = $forSave;
+	Array.prototype.forEach.call($saveInputs, function($input) {
+		$input.addEventListener('change', function() {
 			saveStorage();
 		});
 	});
@@ -158,9 +189,9 @@ function initializeDOMElements() {
  */
 function updateRecordTable() {
 	// 生レコードデータを整理する
-	const orgnizedRecords = getOrgnizedRecords();
+	var orgnizedRecords = getOrgnizedRecords();
 	// テーブルHTML配列を作成する
-	const tableHTMLArray = createTableHTMLArray(orgnizedRecords);
+	var tableHTMLArray = createTableHTMLArray(orgnizedRecords);
 	// テーブルHTML配列をHTMLに変換してinnerHTMLに代入する
 	$recordTable.innerHTML = createTableHTML(tableHTMLArray);
 	// 編成部分をクリックしたときに詳細が見られるようにする
@@ -172,31 +203,31 @@ function updateRecordTable() {
  * シフト画像を表示するイベントを仕込みます。
  */
 function setRotationViewEvents() {
-	const $rotations = $recordTable.getElementsByClassName('rotation-images');
-	Array.prototype.forEach.call($rotations, ($rotation) => {
-		$rotation.addEventListener('click', () => {
-			const id = $rotation.getAttribute('rotation-id');
-			const rot = srrManager.rotations[id - 1];
-			const modal = document.getElementById('modal');
+	var $rotations = $recordTable.getElementsByClassName('rotation-images');
+	Array.prototype.forEach.call($rotations, function($rotation) {
+		$rotation.addEventListener('click', function() {
+			var id = $rotation.getAttribute('rotation-id');
+			var rot = srrManager.rotations[id - 1];
+			var modal = document.getElementById('modal');
 			modal.classList.remove('hidden');
-			const weapons = modal.getElementsByClassName('weapon-image');
-			weapons[0].setAttribute('src', `./assets/img/weapon/${rot.w1}.png`);
-			weapons[1].setAttribute('src', `./assets/img/weapon/${rot.w2}.png`);
-			weapons[2].setAttribute('src', `./assets/img/weapon/${rot.w3}.png`);
-			weapons[3].setAttribute('src', `./assets/img/weapon/${rot.w4}.png`);
+			var weapons = modal.getElementsByClassName('weapon-image');
+			weapons[0].setAttribute('src', './assets/img/weapon/'+rot.w1+'.png');
+			weapons[1].setAttribute('src', './assets/img/weapon/'+rot.w2+'.png');
+			weapons[2].setAttribute('src', './assets/img/weapon/'+rot.w3+'.png');
+			weapons[3].setAttribute('src', './assets/img/weapon/'+rot.w4+'.png');
 			if (rot.rare) {
 				weapons[4].setAttribute('style', '');
-				weapons[4].setAttribute('src', `./assets/img/weapon/${rot.rare}.png`);
+				weapons[4].setAttribute('src', './assets/img/weapon/'+rot.rare+'.png');
 			} else {
 				weapons[4].setAttribute('style', 'display: none;');
 			}
-			const stageId = parseInt(rot.stage) - 1;
-			modal.querySelector('.rotation-stage img').setAttribute('src', `./assets/img/stage/${stageId}.png`);
-			modal.querySelector('.rotation-stage p').textContent = srrManager.STAGE_WORDS[stageId][LANG_KEY];
-			const startStr = unixToString(parseInt(rot.start), true);
-			const endStr = unixToString(parseInt(rot.end), false);
-			const nth = `[${getNthString(parseInt(rot.num))}]`;
-			const timeStr = `${nth} ${startStr} - ${endStr}`;
+			var stageId = parseInt(rot.stage) - 1;
+			modal.querySelector('.rotation-stage img').setAttribute('src', './assets/img/stage/'+stageId+'.png');
+			modal.querySelector('.rotation-stage p').textContent = srrManager.WORDS['stage-' + stageId][LANG_KEY];
+			var startStr = unixToString(parseInt(rot.start), true);
+			var endStr = unixToString(parseInt(rot.end), false);
+			var nth = '['+getNthString(parseInt(rot.num))+']';
+			var timeStr = nth+' '+startStr+' - '+endStr;
 			modal.querySelector('h5').textContent = timeStr;
 		});
 	});
@@ -204,37 +235,33 @@ function setRotationViewEvents() {
 
 
 /** getQueries(url)
- * URLに付けられたクエリパラメータを連想配列にして返します。
- * @param url {string} - クエリパラメータを取得するURL（省略するとlocationから取る）
- * @return {object} クエリパラメータの連想配列
  */
 function getQueries(url) {
-	const urlStr = String(url || window.location);
-	const queryStr = urlStr.slice(urlStr.indexOf('?') + 1);
-	const queries = {};
+	var urlStr = String(url || window.location);
+	var queryStr = urlStr.slice(urlStr.indexOf('?') + 1);
+	var queries = {};
 	if (!queryStr) {
 		return queries;
 	}
-	queryStr.split('&').forEach((queryStr) => {
-		const queryArr = queryStr.split('=');
+	queryStr.split('&').forEach(function(queryStr) {
+		var queryArr = queryStr.split('=');
 		queries[queryArr[0]] = queryArr[1];
 	});
 	return queries;
 }
 
-
 /** saveStorage()
  * localStorageにセーブします。
  */
 function saveStorage() {
-	const saveDataObj = {};
-	Array.prototype.forEach.call($forSave, ($input) => {
-		const key = $input.getAttribute('id');
+	var saveDataObj = {};
+	Array.prototype.forEach.call($forSave, function($input) {
+		var key = $input.getAttribute('id');
 		if (key) {
 			saveDataObj[key] = $input.checked;
 		}
 	});
-	const saveDataJSON = JSON.stringify(saveDataObj);
+	var saveDataJSON = JSON.stringify(saveDataObj);
 	localStorage.setItem(STORAGE_KEY, saveDataJSON);
 }
 
@@ -243,21 +270,31 @@ function saveStorage() {
  * localStorageからロードします。
  */
 function loadStorage() {
-	var saveDataJSON = localStorage.getItem(STORAGE_KEY);
-	if (saveDataJSON !== null) {
-		var saveDataObj = JSON.parse(saveDataJSON);
-		// いったんすべてのチェックを外し
-		Array.prototype.forEach.call($forSave, ($input) => {
-			$input.checked = false;
-		});
-		// チェックを入れる必要があるものは入れ直す
-		Array.prototype.forEach.call($forSave, ($input) => {
-			const key = $input.getAttribute('id');
-			if (saveDataObj[key]) {
-				$input.checked = true;
-			}
-		});
-	}
+	// デフォルトのセーブデータ
+	var defaultSaveDataObj = Object.assign({}, DEFAULT_SAVEDATA);
+	// localStorageから取り出した文字列
+	var saveDataJSON = localStorage.getItem(STORAGE_KEY) || '{}';
+	// デフォルトのセーブデータにlocalStorageのデータをマージする
+	var saveDataObj = Object.assign(defaultSaveDataObj, JSON.parse(saveDataJSON));
+	// いったんすべての$forSaveのチェックを外し
+	Array.prototype.forEach.call($forSave, function($input) {
+		$input.checked = false;
+	});
+	// チェックを入れる必要があるものは入れ直す
+	Array.prototype.forEach.call($forSave, function($input) {
+		var key = $input.getAttribute('id');
+		if (saveDataObj[key]) {
+			$input.checked = true;
+		}
+	});
+}
+
+
+/** clearStorage()
+ * localStorageをクリアします。
+ */
+function clearStorage() {
+	localStorage.removeItem(STORAGE_KEY);
 }
 
 
@@ -269,13 +306,13 @@ function loadStorage() {
 function getOrgnizedRecords() {
 
 	// 編成種別のチェック状況
-	const checked = {
+	var checked = {
 		'rotation-normal': document.getElementById('rotation-normal').checked,
 		'rotation-green-mystery-one': document.getElementById('rotation-green-mystery-one').checked,
 		'rotation-green-mystery-all': document.getElementById('rotation-green-mystery-all').checked,
 		'rotation-golden-mystery': document.getElementById('rotation-golden-mystery').checked,
 	};
-	
+
 	return srrManager.getRecords(checked);
 }
 
@@ -288,7 +325,7 @@ function getOrgnizedRecords() {
  */
 function getNthString(num) {
 	if (LANG_KEY === 'ja') {
-		return `第${num}回`;
+		return '第'+num+'回';
 	}
 	switch (num) {
 		case 1:
@@ -298,7 +335,7 @@ function getNthString(num) {
 		case 3:
 			return '3rd';
 		default:
-			return `${num}th`;
+			return num+'th';
 	}
 }
 
@@ -312,32 +349,32 @@ function getNthString(num) {
  * @return {string} 文字列に変換されたUNIX時刻
  */
 function unixToString(unix, isEnabledYear) {
-	const date = new Date(unix * 1000);
-	const Y = date.getFullYear();
-	const M = date.getMonth() + 1;
-	const D = date.getDate();
-	const m = date.getMinutes();
-	const MS = [
-		'Jan.',
-		'Feb.',
-		'Mar.',
-		'Apr.',
+	var date = new Date(unix * 1000);
+	var Y = date.getFullYear();
+	var M = date.getMonth() + 1;
+	var D = date.getDate();
+	var m = ('00' + date.getMinutes()).slice(-2);
+	var MS = [
+		'Jan',
+		'Feb',
+		'Mar',
+		'Apr',
 		'May',
-		'Jun.',
-		'Jul.',
-		'Aug.',
-		'Sep.',
-		'Oct.',
-		'Nov.',
-		'Dec.',
+		'Jun',
+		'Jul',
+		'Aug',
+		'Sep',
+		'Oct',
+		'Nov',
+		'Dec',
 	][M - 1];
-	let h = date.getHours();
-	let ampm;
+	var h = date.getHours();
+	var ampm;
 	if (LANG_KEY === 'ja') {
 		if (isEnabledYear) {
-			return `${Y}/${M}/${D} ${h}:00`;
+			return Y+'年'+M+'月'+D+'日 '+h+':'+m;
 		} else {
-			return `${M}/${D} ${h}:00`;
+			return M+'月'+D+'日 '+h+':'+m;
 		}
 	} else {
 		if (h < 12) { 
@@ -350,9 +387,9 @@ function unixToString(unix, isEnabledYear) {
 			h = 12;
 		}
 		if (isEnabledYear) {
-			return `${getNthString(D)} ${MS} ${Y} ${h}:00 ${ampm}`;
+			return getNthString(D)+' '+MS+' '+Y+' '+h+':'+m+' '+ampm;
 		} else {
-			return `${getNthString(D)} ${MS} ${h}:00 ${ampm}`;
+			return getNthString(D)+' '+MS+' '+h+':'+m+' '+ampm;
 		}
 	}
 }
@@ -361,8 +398,8 @@ function unixToString(unix, isEnabledYear) {
 /** getScoreHTML(rec)
  */
 function getScoreHTML(rec) {
-	const className = (POWER_EGGS_RECORD_IDS.indexOf(parseInt(rec['record id'])) > -1) ? 'p-eggs' : 'eggs';
-	let eggsHTML = `<p class="${className}"><span class="num">${rec.score}</span></p>`;
+	var className = (POWER_EGGS_RECORD_IDS.indexOf(parseInt(rec['record id'])) > -1) ? 'p-eggs' : 'eggs';
+	var eggsHTML = '<p class="'+className+'"><span class="num">'+rec.score+'</span></p>';
 	return eggsHTML;
 }
 
@@ -370,11 +407,11 @@ function getScoreHTML(rec) {
 /** getMembersHTML(rec)
  */
 function getMembersHTML(rec) {
-	let membersHTML = rec['member 1'];
+	var membersHTML = rec['member 1'];
 	if (rec['member 2']) membersHTML += ' ' + rec['member 2'];
 	if (rec['member 3']) membersHTML += ' ' + rec['member 3'];
 	if (rec['member 4']) membersHTML += ' ' + rec['member 4'];
-	membersHTML = `<p class="members">${membersHTML}</p>`;
+	membersHTML = '<p class="members">'+membersHTML+'</p>';
 	return membersHTML;
 }
 
@@ -382,16 +419,16 @@ function getMembersHTML(rec) {
 /** getRotationHTML(rec)
  */
 function getRotationHTML(rec) {
-	let rotationHTML = '';
-	const rotationId = parseInt(rec['rotation id']);
+	var rotationHTML = '';
+	var rotationId = parseInt(rec['rotation id']);
 	if (!isNaN(rotationId)) {
-		const rot = srrManager.rotations[rotationId - 1];
-		const w1 = `<li><img src="./assets/img/weapon/${rot.w1}.png"></li>`;
-		const w2 = `<li><img src="./assets/img/weapon/${rot.w2}.png"></li>`;
-		const w3 = `<li><img src="./assets/img/weapon/${rot.w3}.png"></li>`;
-		const w4 = `<li><img src="./assets/img/weapon/${rot.w4}.png"></li>`;
-		const w5 = (rot.rare) ? `<li><img src="./assets/img/weapon/${rot.rare}.png"></li>` : '';
-		rotationHTML = `<ul class="rotation-images" rotation-id="${rotationId}">${w1}${w2}${w3}${w4}${w5}</ul>`;
+		var rot = srrManager.rotations[rotationId - 1];
+		var w1 = '<li><img src="./assets/img/weapon/'+rot.w1+'.png" title=""></li>';
+		var w2 = '<li><img src="./assets/img/weapon/'+rot.w2+'.png" title=""></li>';
+		var w3 = '<li><img src="./assets/img/weapon/'+rot.w3+'.png" title=""></li>';
+		var w4 = '<li><img src="./assets/img/weapon/'+rot.w4+'.png" title=""></li>';
+		var w5 = (rot.rare) ? '<li><img src="./assets/img/weapon/'+rot.rare+'.png"></li>' : '';
+		rotationHTML = '<ul class="rotation-images" rotation-id="'+rotationId+'">'+w1+w2+w3+w4+w5+'</ul>';
 	}
 	return rotationHTML;
 }
@@ -401,35 +438,77 @@ function getRotationHTML(rec) {
  */
 function getLinksHTML(rec) {
 	if (rec.links) {
-		let linksHTML = '';
+		var linksHTML = '';
 		// 生レコードのlinks列のデータをカンマで区切って配列にします
 		// 基本的にありえないので考慮していないが、URL自体にカンマが含まれているとそこで区切られてしまいバグる
 		// ex) https://example,co.jp, https://example,ne.jp のような場合
-		const urls = rec.links.split(',');
-		urls.forEach((item) => {
+		var urls = rec.links.split(',');
+		urls.forEach(function(item) {
 			// スペースなどをトリムする
-			const url = item.trim();
+			var url = item.trim();
 			if (url.indexOf('http://') > -1 || url.indexOf('https://') > -1) { 
 				// 「//」の後を取得する
-				const url2 = url.split('//')[1];
+				var url2 = url.split('//')[1];
 				if (url2) {
 					// FQDN部分を取得する
-					const fqdn = url2.split('/')[0];
+					var fqdn = url2.split('/')[0].replace('www.', '');
 					// クエリパラメータを取得する
-					const queries = getQueries(url);
+					var queries = getQueries(url);
 					// アイコンタイプを決定する
-					const type = queries.type || FQDN_ICON_TYPES[fqdn] || 'chain';
+					var type = queries.type || FQDN_ICON_TYPES[fqdn] || 'chain';
 					// プレイヤー
-					const title = (!queries.player) ? '' :
-						(LANG_KEY === 'ja') ? queries.player + '視点' :
-						 queries.player + '\'s POV';
+					var title = '';
+					if (queries.player) {
+						if (type === 'twivideo') {
+							if (LANG_KEY === 'ja') {
+								title = 'プレイ動画付きツイート - ' + queries.player + '視点';
+							} else {
+								title = 'Tweet with play video - ' + queries.player + '\'s POV';
+							}
+						} else {
+							if (LANG_KEY === 'ja') {
+								title = 'プレイ動画 - ' + queries.player + '視点';
+							} else {
+								title = 'Play video - ' + queries.player + '\'s POV';
+							}
+						}
+					} else if (type === 'twitter') {
+						var arr = url.split('/');
+						var step = 0;
+						for (var i = 0; i < arr.length; i++) {
+							if (step === 1) {
+								if (LANG_KEY === 'ja') {
+									title = '@' + arr[i] + ' さんのツイート';
+								} else {
+									title = 'Tweet by @' + arr[i];
+								}
+								step++;
+							} else if (step === 2) {
+								step++;
+							} else if (step === 3) {
+								var timestamp = parseInt(arr[i]);
+								for (let i = 0; i < 22; i += 1) {
+									timestamp /= 2;
+								}
+								// UNIX時刻(ミリ秒)
+								var milli_unix = Math.floor(timestamp) + 1288834974657;
+								// UNIX時刻
+								var unix = Math.floor(milli_unix / 1000);
+								var str = unixToString(unix, true);
+								title += ' (' + str + ')';
+								break;
+							} else if (arr[i] === 'twitter.com') {
+								step++;
+							}
+						}
+					}
 					if (type !== 'none') {
-						linksHTML += `<a href="${encodeURI(url)}" title="${title}" target="_blank"><img src="./assets/img/link-${type}.png"></a>`;
+						linksHTML += '<a href="'+encodeURI(url)+'" title="'+title+'" target="_blank"><img src="./assets/img/link-'+type+'.png"></a>';
 					}
 				}
 			}
 		});
-		return `<p class="links">${linksHTML}</p>`;
+		return '<p class="links">'+linksHTML+'</p>';
 	} else {
 		return '';
 	}
@@ -442,56 +521,57 @@ function getLinksHTML(rec) {
  * @return {array} 各セル要素のinnerHTMLが格納された二次元配列
  */
 function createTableHTMLArray(organizedRecords) {
-	const tableHTMLArray = [['']];
+	var tableHTMLArray = [['']];
 
 	// チェックが入っているステージのラジオボタンを特定する
-	let visibleStage;
-	const $radios = document.getElementsByName('visible-stage');
-	Array.prototype.forEach.call($radios, ($radio) => {
+	var visibleStage;
+	var $radios = document.getElementsByName('visible-stage');
+	Array.prototype.forEach.call($radios, function($radio) {
 		if ($radio.checked) {
 			visibleStage = $radio.getAttribute('value');
 		}
 	});
 
 	// ステージ画像とステージ名の行を作る
-	for (let x = 0; x < STAGE_COUNT; x++) {
+	for (var hx = 0; hx < STAGE_COUNT; hx++) {
 		// 無視すべきステージはスキップする
-		if (visibleStage.indexOf('' + x) < 0) {
+		if (visibleStage.indexOf('' + hx) < 0) {
 			continue;
 		}
-		const stage = `<img src="./assets/img/stage/${x}.png">`;
-		tableHTMLArray[0][x + 1] = `${stage}<p>${srrManager.STAGE_WORDS[x][`${LANG_KEY}`]}</p>`;
+		var stage = '<img src="./assets/img/stage/'+hx+'.png">';
+		tableHTMLArray[0][hx + 1] = stage+'<p>'+srrManager.WORDS['stage-' + hx][LANG_KEY]+'</p>';
 	}
 
 	// 各行（各種目）について
-	for (let y = 0; y < RECORD_ORDER.length; y++) {
-		const n = RECORD_ORDER[y];
+	for (var y = 0; y < RECORD_ORDER.length; y++) {
+		var n = RECORD_ORDER[y];
 		tableHTMLArray[y + 1] = [];
 		// 左端ヘッダーには種目名を入れる
-		tableHTMLArray[y + 1][0] = srrManager.EVENT_WORDS[n][LANG_KEY];
+		tableHTMLArray[y + 1][0] = srrManager.WORDS['record-' + n][LANG_KEY];
 		// 各ステージについて
-		for (let x = 0; x < STAGE_COUNT; x++) {
+		for (var x = 0; x < STAGE_COUNT; x++) {
 			// 無視すべきステージはスキップする
 			if (visibleStage.indexOf('' + x) < 0) {
 				continue;
 			}
-			const rec = organizedRecords[`${x}-${n}`];
+			var rec = organizedRecords[x+'-'+n];
 			if (!rec) {
 				tableHTMLArray[y + 1][x + 1] = '';
 				continue;
 			}
-			let html = '';
+			var html = '';
 			html += getScoreHTML(rec);
 			html += getMembersHTML(rec);
 			html += getRotationHTML(rec);
 			html += getLinksHTML(rec);
 			if ('ties' in rec) {
 				html += '<div class="ties">';
-				rec.ties.forEach((tie) => {
+				for (var i = 0; i < rec.ties.length; i++) {
+					var tie = rec.ties[i];
 					html += getMembersHTML(tie);
 					html += getRotationHTML(tie);
 					html += getLinksHTML(tie);
-				});
+				}
 				html += '</div>';
 			}
 			tableHTMLArray[y + 1][x + 1] = html;
@@ -509,45 +589,25 @@ function createTableHTMLArray(organizedRecords) {
  * @return {string} テーブル要素のinnerHTML
  */
 function createTableHTML(tableHTMLArray) {
-	let html = '';
-	tableHTMLArray.forEach((tr, y) => {
+	var html = '';
+	tableHTMLArray.forEach(function(tr, y) {
 		if (y === 0) {
 			html += '<thead><tr>';
-			tr.forEach((td, x) => {
-				html += `<th>${td}</th>`;
+			tr.forEach(function(td, x) {
+				html += '<th>'+td+'</th>';
 			});
 			html += '</tr></thead>';
 		} else {
 			html += '<tr>';
-			tr.forEach((td, x) => {
+			tr.forEach(function(td, x) {
 				if (x === 0) {
-					html += `<th>${td}</th>`;
+					html += '<th>'+td+'</th>';
 				} else {
-					html += `<td>${td}</td>`;
+					html += '<td>'+td+'</td>';
 				}
 			});
 			html += '</tr>';
 		}
 	});
 	return html;
-}
-
-
-/** alphabet2int(str)
- * A, B, C…といった文字列を1, 2, 3…のような数値に変換します。
- * AA, AB, AC…は27, 28, 29…となります。
- * @param {string} - アルファベットの文字列
- * @return {number} - 変換結果
- */
-function alphabet2int(str) {
-	const charCodeA = 'a'.charCodeAt(0);
-	const lower = str.toLowerCase();
-	let sum = 0;
-	for (let i = 0; i < lower.length; i++) {
-		const a = lower[i];
-		const b = a.charCodeAt(0) - charCodeA + 1;
-		const c = b * Math.pow(26, i);
-		sum += c;
-	}
-	return sum;
 }
