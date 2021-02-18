@@ -1,36 +1,49 @@
+// ========================
+// main.js
+// ========================
+
+
 /** STORAGE_KEY
  * localStorageに保存する際に使用するキー
  */
 var STORAGE_KEY = 'salmon-run-records';
+
 
 /** NAVIGATOR_LANG
  * navigatorの言語
  */
 var NAVIGATOR_LANG = navigator.language || navigator.userLanguage || 'ja';
 
+
 /** LOCATION_QUERIES
  * locationのクエリパラメータ
  */
 var LOCATION_QUERIES = getQueries();
+
 
 /** LANG_KEY
  * locationのクエリパラメータもしくはnavigatorから言語を日本語か英語のどちらかひとつに決定
  */
 var LANG_KEY = (LOCATION_QUERIES.lang === 'ja') ? 'ja' : (LOCATION_QUERIES.lang === 'en') ? 'en' : (NAVIGATOR_LANG.indexOf('ja') > -1) ? 'ja' : 'en';
 
+
 /** STAGE_COUNT
  * ステージの数
  */
 var STAGE_COUNT = 5;
 
+
 /** RECORD_ORDER
  * 表示する記録カテゴリのリスト
  */
 var RECORD_ORDER = [
-	0, 1, 3, 29, 4, 5, 6, 7, 8, 9, 10,
-	11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-	21, 22, 23, 24, 25, 26, 27, 28,
+	0, 30, 31, 1,
+	3, 32, 33, 29,
+	4, 6,
+	8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+	24, 34, 25, 35
 ];
+
 
 /** DEFAULT_SAVEDATA
  * デフォルトのセーブデータ
@@ -41,6 +54,7 @@ var DEFAULT_SAVEDATA = {
 	'display-item-members': true,
 	'display-item-rotation': true,
 	'display-item-ties': true,
+	'display-update-log': true,
 	'radio-stage-0': false,
 	'radio-stage-1': false,
 	'radio-stage-2': false,
@@ -50,14 +64,19 @@ var DEFAULT_SAVEDATA = {
 	'rotation-golden-mystery': false,
 	'rotation-green-mystery-all': false,
 	'rotation-green-mystery-one': false,
-	'rotation-normal': true
+	'rotation-normal': true,
+	'change-roman': false,
+	'omit-ties': false,
+	'fix-thead': false	
 };
+
 
 /** POWER_EGGS_RECORD_IDS
  * 赤イクラ記録の種目IDたち
  * これに該当する種目は、イクラの前に赤イクラアイコンを付ける
  */
 var POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28];
+
 
 /** FQDN_ICON_TYPES
  * リンクのドメインごとに表示する画像を決める
@@ -80,28 +99,212 @@ var FQDN_ICON_TYPES = {
 	'nicovideo.jp': 'niconico',
 };
 
-/**
- * 何回もアクセスすることになるであろうDOM要素への参照
+
+/** その他のインスタンス
  */
+var isTouchDevice;
+var srrManager;
+var clickEvent;
+var saveDataObj;
+var $recordTableArea;
+var $recordTableWrapper;
 var $recordTable;
 var $forSave;
-var srrManager;
+var $modalRot;
+var $modalRotInner;
+var $modalUpdateLog;
+var $modalUpdateLogTable;
+var $modalUpdateLogFooter;
+var $modalUpdateLogClose;
+var scrollTarget;
+
 
 /** DOMContentLoaded
  */
 window.addEventListener('DOMContentLoaded', function() {
 	console.log('Event: DOMContentLoaded');
 
-	// レコードテーブル要素を取得
+	// DOM要素を取得
+	$recordTableArea = document.getElementById('record-table-area');
+	$recordTableWrapper = document.getElementById('record-table-wrapper');
 	$recordTable = document.getElementById('record-table');
 	$forSave = document.getElementsByClassName('for-save');
+	$modalRot = document.getElementById('modal-rotation');
+	$modalRotInner = document.getElementById('modal-rotation-inner');
+	$modalUpdateLog = document.getElementById('modal-update-log');
+	$modalUpdateLogTable = document.getElementById('modal-update-log-table');
+	$modalUpdateLogFooter = document.getElementById('modal-update-log-footer');
+	$modalUpdateLogClose = document.getElementById('modal-update-log-close');
+
+	if ('scrollingElement' in document) {
+		scrollTarget = document.scrollingElement;
+	} else if ('documentElement' in document) {
+		scrollTarget = document.documentElement;
+	} else {
+		scrollTarget = document.body;
+	}
 
 	// localStorageから設定を読み込む
 	loadStorage();
 
-	// 各DOM要素にイベントを設定したり初期値を設定したりする
-	initializeDOMElements();
+	// タッチデバイスかマウスデバイスか
+	if ('ontouchstart' in window) {
+		isTouchDevice = true;
+		clickEvent = 'click';
+		document.body.classList.add('touchdevice');
+	} else {
+		isTouchDevice = false;
+		clickEvent = 'click';
+		document.body.classList.add('mousedevice');
+	}
+
+	if (isTouchDevice) {
+		$recordTableArea.addEventListener('scroll', function() {
+			if (saveDataObj['fix-thead'] && saveDataObj['radio-stage-all']) {
+				var rect = $recordTableArea.getBoundingClientRect();
+				if (rect.top !== 0) {
+					scrollTarget.scrollTop += rect.top;
+				}
+			}
+		});
+	}
+	/*
+	if (isTouchDevice) {
+		var timer;
+		var beforeTableTop = -1;
+		var tableScrollHandler = function() {
+			if (saveDataObj['fix-thead'] && saveDataObj['radio-stage-all']) {
+				var move = $recordTableArea.scrollTop - beforeTableTop;
+				beforeTableTop = $recordTableArea.scrollTop;
+				var rect = $recordTableArea.getBoundingClientRect();
+				if (rect.top !== 0) {
+					$recordTableArea.scrollTop -= move;
+					timer = setTimeout(function() {
+						scrollTarget.scrollTop += move;
+						scrollHandler();
+					}, 1);
+				}
+				//scrollTarget.scrollTop += rect.top;
+			}
+		};
+		var beforeTop = -1;
+		var scrollHandler = function() {
+			if (saveDataObj['fix-thead'] && saveDataObj['radio-stage-all']) {
+				clearTimeout(timer);
+				var move = scrollTarget.scrollTop - beforeTop;
+				beforeTop = scrollTarget.scrollTop;
+				var rect = $recordTableArea.getBoundingClientRect();
+				if (move > 0) {
+					// ページを下方向にスクロールしたとき
+					// テーブル最上部が画面よりも上にはみ出ようとしたならそれを食い止めたい
+					if (rect.top < 0) {
+						var tableRect = $recordTable.getBoundingClientRect();
+						if (rect.height + $recordTableArea.scrollTop - rect.top < tableRect.height) {
+							scrollTarget.scrollTop += rect.top;
+						}
+					}
+				} else {
+					// 上方向にスクロールしたとき
+				}
+			}
+		};
+		$recordTableArea.addEventListener('scroll', tableScrollHandler);
+		window.addEventListener('scroll', scrollHandler);
+	}
+	*/
+
+	$modalUpdateLogFooter.addEventListener(clickEvent, function() {
+		$modalUpdateLog.classList.add('hidden');
+		document.body.classList.remove('body-fix-for-update-log');
+	});
+
+	$modalUpdateLogClose.addEventListener(clickEvent, function() {
+		$modalUpdateLog.classList.add('hidden');
+		document.body.classList.remove('body-fix-for-update-log');
+	});
+
+	// モーダルウィンドウをクリックしたらモーダルウィンドウを閉じる
+	$modalRot.addEventListener(clickEvent, function() {
+		$modalRot.classList.add('hidden');
+		document.body.classList.remove('body-fix-for-rotation');
+	});
+
+	// モーダルウィンドウ中の要素をクリックしても上のイベントが呼ばれないようにする
+	$modalRotInner.addEventListener(clickEvent, function(e) {
+		e.stopPropagation();
+	});
+
+	// 言語設定が英語なら翻訳対象のDOM要素をすべて翻訳する
+	if (LANG_KEY === 'en') {
+		var $transElements = document.getElementsByClassName('for-translation');
+		Array.prototype.forEach.call($transElements, function($elm) {
+			var txt = $elm.getAttribute('en-text');
+			$elm.textContent = txt;
+		});
+	}
+
+	// 値が変更されたときlocalStorageにセーブしなければならないような
+	// <input>要素すべてにイベントを仕込む
+	Array.prototype.forEach.call($forSave, function($input) {
+		$input.addEventListener('change', function() {
+			saveStorage();
+		});
+	});
+
+	// 値が変更されたときレコードテーブルを更新しなければならないような
+	// <input>要素すべてにイベントを仕込む
+	Array.prototype.forEach.call(document.getElementsByClassName('for-update-table'), function($input) {
+		$input.addEventListener('change', function() {
+			updateRecordTable();
+			console.log('テーブルを更新しました。');
+		});
+	});
+
+	// 値が変更されたときレコードテーブルのクラスを付け替えなければならないような
+	// <input>要素すべてにイベントを仕込む
+	Array.prototype.forEach.call(document.getElementsByClassName('for-update-table-class'), function($input) {
+		var toggleClass = $input.getAttribute('toggle-class');
+		var update = function() {
+			if ($input.checked) {
+				$modalUpdateLogTable.classList.add(toggleClass);
+				$recordTable.classList.add(toggleClass);
+			} else {
+				$modalUpdateLogTable.classList.remove(toggleClass);
+				$recordTable.classList.remove(toggleClass);
+			}
+		};
+		$input.addEventListener('change', update);
+		update();
+	});
+
+	// 値が変更されたときレコードテーブルのクラスを付け替えなければならないような
+	// <input>要素すべてにイベントを仕込む
+	Array.prototype.forEach.call(document.getElementsByClassName('for-update-body-class'), function($input) {
+		var toggleClass = $input.getAttribute('toggle-class');
+		var update = function() {
+			if ($input.checked) {
+				document.body.classList.add(toggleClass);
+			} else {
+				document.body.classList.remove(toggleClass);
+			}
+		};
+		$input.addEventListener('change', update);
+		update();
+	});
+
+	Array.prototype.forEach.call(document.getElementsByName('visible-stage'), function($input) {
+		var update = function() {
+			if (saveDataObj['radio-stage-all']) {
+				document.body.classList.add('all-stage');
+			} else {
+				document.body.classList.remove('all-stage');
+			}
+		};
+		$input.addEventListener('change', update);
+		update();
+	});
 });
+
 
 /** load
  */
@@ -118,72 +321,6 @@ window.addEventListener('load', function() {
 });
 
 
-/** initializeDOMElements()
- */
-function initializeDOMElements() {
-	// タッチデバイスかマウスデバイスか
-	if ('ontouchstart' in window) {
-		document.body.classList.add('touchdevice');
-	} else {
-		document.body.classList.add('mousedevice');
-	}
-
-	// モーダルウィンドウをクリックしたらモーダルウィンドウを閉じる
-	document.getElementById('modal').addEventListener('click', function() {
-		document.getElementById('modal').classList.add('hidden');
-	});
-
-	// モーダルウィンドウ中の要素をクリックしても上のイベントが呼ばれないようにする
-	document.getElementById('modal-rotation').addEventListener('click', function(e) {
-		e.stopPropagation();
-	});
-
-	// 言語設定が英語なら翻訳対象のDOM要素をすべて翻訳する
-	if (LANG_KEY === 'en') {
-		var $transElements = document.getElementsByClassName('for-translation');
-		Array.prototype.forEach.call($transElements, function($elm) {
-			var txt = $elm.getAttribute('en-text');
-			$elm.textContent = txt;
-		});
-	}
-
-	// 値が変更されたときレコードテーブルを更新しなければならないような
-	// <input>要素すべてにイベントを仕込む
-	var $inputs = document.getElementsByClassName('for-update-table');
-	Array.prototype.forEach.call($inputs, function($input) {
-		$input.addEventListener('change', function() {
-			updateRecordTable();
-			console.log('テーブルを更新しました。');
-		});
-	});
-
-	// 値が変更されたときレコードテーブルのクラスを付け替えなければならないような
-	// <input>要素すべてにイベントを仕込む
-	var $inputs2 = document.getElementsByClassName('for-update-table-class');
-	Array.prototype.forEach.call($inputs2, function($input) {
-		var toggleClass = $input.getAttribute('toggle-class');
-		var update = function() {
-			if ($input.checked) {
-				$recordTable.classList.add(toggleClass);
-			} else {
-				$recordTable.classList.remove(toggleClass);
-			}
-		};
-		$input.addEventListener('change', update);
-		update();
-	});
-
-	// 値が変更されたときlocalStorageにセーブしなければならないような
-	// <input>要素すべてにイベントを仕込む
-	var $saveInputs = $forSave;
-	Array.prototype.forEach.call($saveInputs, function($input) {
-		$input.addEventListener('change', function() {
-			saveStorage();
-		});
-	});
-}
-
-
 /** updateRecordTable()
  * レコードテーブルを更新します。
  */
@@ -196,21 +333,69 @@ function updateRecordTable() {
 	$recordTable.innerHTML = createTableHTML(tableHTMLArray);
 	// 編成部分をクリックしたときに詳細が見られるようにする
 	setRotationViewEvents();
+	//var rect = $recordTable.getBoundingClientRect();
+	//$recordTableWrapper.style.setProperty('width', rect.width + 'px');
 }
+
+
+/** showUpdateLog(stageId, recordId)
+ */
+function showUpdateLog(stageId, recordId) {
+	var records = srrManager.getRecordsOneCategory({
+		'rotation-normal': document.getElementById('rotation-normal').checked,
+		'rotation-green-mystery-one': document.getElementById('rotation-green-mystery-one').checked,
+		'rotation-green-mystery-all': document.getElementById('rotation-green-mystery-all').checked,
+		'rotation-golden-mystery': document.getElementById('rotation-golden-mystery').checked,
+	}, stageId, recordId);
+	var allHtml = '';
+	var stage = srrManager.WORDS['stage-' + stageId][LANG_KEY];
+	var record = srrManager.WORDS['record-' + recordId][LANG_KEY];
+	allHtml += '<h4><p>' + stage + '</p>';
+	allHtml += '<p>×</p>';
+	allHtml += '<p>' + record + '</p></h4><ul>';
+	records.reverse();
+	records.forEach(function(rec, i) {
+		var html = '';
+		if (i > 0) {
+			html += '<hr>';
+		}
+		html += '<li>';
+		html += getScoreHTML(rec);
+		html += getMembersHTML(rec);
+		html += getRotationHTML(rec);
+		html += getLinksHTML(rec);
+		var date = new Date(rec.date);
+		var offset = (date.getTimezoneOffset() + 540) * 60 * 1000;
+		var localDate = new Date(date.getTime() + offset);
+		html += '<p class="date">' + dateToDateString(localDate) + '</p>';
+		html += '</li>';
+		allHtml += html;
+	});
+	allHtml += '</ul>';
+	$modalUpdateLogTable.innerHTML = allHtml;
+	setRotationViewEvents(true);
+	$modalUpdateLog.classList.remove('hidden');
+	document.body.classList.add('body-fix-for-update-log');
+	$modalUpdateLog.scrollTop = 0;
+}
+
 
 /** setRotationViewEvents()
  * レコードテーブルのブキ編成をクリックしたときに
  * シフト画像を表示するイベントを仕込みます。
  */
-function setRotationViewEvents() {
-	var $rotations = $recordTable.getElementsByClassName('rotation-images');
+function setRotationViewEvents(bool) {
+	var $rotations;
+	if (!bool) {
+		$rotations = $recordTable.getElementsByClassName('rotation-images');
+	} else {
+		$rotations = $modalUpdateLogTable.getElementsByClassName('rotation-images');
+	}
 	Array.prototype.forEach.call($rotations, function($rotation) {
-		$rotation.addEventListener('click', function() {
+		$rotation.addEventListener(clickEvent, function() {
 			var id = $rotation.getAttribute('rotation-id');
 			var rot = srrManager.rotations[id - 1];
-			var modal = document.getElementById('modal');
-			modal.classList.remove('hidden');
-			var weapons = modal.getElementsByClassName('weapon-image');
+			var weapons = $modalRot.getElementsByClassName('weapon-image');
 			weapons[0].setAttribute('src', './assets/img/weapon/'+rot.w1+'.png');
 			weapons[1].setAttribute('src', './assets/img/weapon/'+rot.w2+'.png');
 			weapons[2].setAttribute('src', './assets/img/weapon/'+rot.w3+'.png');
@@ -222,13 +407,15 @@ function setRotationViewEvents() {
 				weapons[4].setAttribute('style', 'display: none;');
 			}
 			var stageId = parseInt(rot.stage) - 1;
-			modal.querySelector('.rotation-stage img').setAttribute('src', './assets/img/stage/'+stageId+'.png');
-			modal.querySelector('.rotation-stage p').textContent = srrManager.WORDS['stage-' + stageId][LANG_KEY];
+			$modalRot.querySelector('.rotation-stage img').setAttribute('src', './assets/img/stage/'+stageId+'.png');
+			$modalRot.querySelector('.rotation-stage p').textContent = srrManager.WORDS['stage-' + stageId][LANG_KEY];
 			var startStr = unixToString(parseInt(rot.start), true);
 			var endStr = unixToString(parseInt(rot.end), false);
 			var nth = '['+getNthString(parseInt(rot.num))+']';
 			var timeStr = nth+' '+startStr+' - '+endStr;
-			modal.querySelector('h5').textContent = timeStr;
+			$modalRot.querySelector('h5').textContent = timeStr;
+			$modalRot.classList.remove('hidden');
+			document.body.classList.add('body-fix-for-rotation');
 		});
 	});
 }
@@ -250,11 +437,12 @@ function getQueries(url) {
 	return queries;
 }
 
+
 /** saveStorage()
  * localStorageにセーブします。
  */
 function saveStorage() {
-	var saveDataObj = {};
+	saveDataObj = saveDataObj || {};
 	Array.prototype.forEach.call($forSave, function($input) {
 		var key = $input.getAttribute('id');
 		if (key) {
@@ -275,7 +463,7 @@ function loadStorage() {
 	// localStorageから取り出した文字列
 	var saveDataJSON = localStorage.getItem(STORAGE_KEY) || '{}';
 	// デフォルトのセーブデータにlocalStorageのデータをマージする
-	var saveDataObj = Object.assign(defaultSaveDataObj, JSON.parse(saveDataJSON));
+	saveDataObj = Object.assign(defaultSaveDataObj, JSON.parse(saveDataJSON));
 	// いったんすべての$forSaveのチェックを外し
 	Array.prototype.forEach.call($forSave, function($input) {
 		$input.checked = false;
@@ -304,16 +492,12 @@ function clearStorage() {
  * @return {object} 各種目の最高記録レコードが詰め込まれたオブジェクト
  */
 function getOrgnizedRecords() {
-
-	// 編成種別のチェック状況
-	var checked = {
+	return srrManager.getRecords({
 		'rotation-normal': document.getElementById('rotation-normal').checked,
 		'rotation-green-mystery-one': document.getElementById('rotation-green-mystery-one').checked,
 		'rotation-green-mystery-all': document.getElementById('rotation-green-mystery-all').checked,
 		'rotation-golden-mystery': document.getElementById('rotation-golden-mystery').checked,
-	};
-
-	return srrManager.getRecords(checked);
+	});
 }
 
 
@@ -395,6 +579,34 @@ function unixToString(unix, isEnabledYear) {
 }
 
 
+/** dateToDateString(date)
+ */
+function dateToDateString(date) {
+	var Y = date.getFullYear();
+	var M = date.getMonth() + 1;
+	var D = date.getDate();
+	var MS = [
+		'Jan',
+		'Feb',
+		'Mar',
+		'Apr',
+		'May',
+		'Jun',
+		'Jul',
+		'Aug',
+		'Sep',
+		'Oct',
+		'Nov',
+		'Dec',
+	][M - 1];
+	if (LANG_KEY === 'ja') {
+		return Y+'年'+M+'月'+D+'日';
+	} else {
+		return getNthString(D)+' '+MS+' '+Y;
+	}
+}
+
+
 /** getScoreHTML(rec)
  */
 function getScoreHTML(rec) {
@@ -407,10 +619,18 @@ function getScoreHTML(rec) {
 /** getMembersHTML(rec)
  */
 function getMembersHTML(rec) {
-	var membersHTML = rec['member 1'];
-	if (rec['member 2']) membersHTML += ' ' + rec['member 2'];
-	if (rec['member 3']) membersHTML += ' ' + rec['member 3'];
-	if (rec['member 4']) membersHTML += ' ' + rec['member 4'];
+	var membersHTML = '';
+	if (saveDataObj['change-roman']) {
+		if (rec['member 1']) membersHTML += window.wordToRoman(rec['member 1']);
+		if (rec['member 2']) membersHTML += ' ' + window.wordToRoman(rec['member 2']);
+		if (rec['member 3']) membersHTML += ' ' + window.wordToRoman(rec['member 3']);
+		if (rec['member 4']) membersHTML += ' ' + window.wordToRoman(rec['member 4']);
+	} else {
+		if (rec['member 1']) membersHTML += rec['member 1'];
+		if (rec['member 2']) membersHTML += ' ' + rec['member 2'];
+		if (rec['member 3']) membersHTML += ' ' + rec['member 3'];
+		if (rec['member 4']) membersHTML += ' ' + rec['member 4'];
+	}
 	membersHTML = '<p class="members">'+membersHTML+'</p>';
 	return membersHTML;
 }
@@ -431,6 +651,14 @@ function getRotationHTML(rec) {
 		rotationHTML = '<ul class="rotation-images" rotation-id="'+rotationId+'">'+w1+w2+w3+w4+w5+'</ul>';
 	}
 	return rotationHTML;
+}
+
+
+/** getLogHTML(rec)
+ */
+function getLogHTML(rec) {
+	var logHTML = '<img src="./assets/img/update-log.png" class="update-log" on'+clickEvent+'="showUpdateLog('+rec['stage id']+', '+rec['record id']+');" stage-id="'+rec['stage id']+'" record-id="'+rec['record id']+'">';
+	return logHTML;
 }
 
 
@@ -459,6 +687,9 @@ function getLinksHTML(rec) {
 					// プレイヤー
 					var title = '';
 					if (queries.player) {
+						if (saveDataObj['change-roman']) {
+							queries.player = window.wordToRoman(queries.player);
+						}
 						if (type === 'twivideo') {
 							if (LANG_KEY === 'ja') {
 								title = 'プレイ動画付きツイート - ' + queries.player + '視点';
@@ -487,7 +718,7 @@ function getLinksHTML(rec) {
 								step++;
 							} else if (step === 3) {
 								var timestamp = parseInt(arr[i]);
-								for (let i = 0; i < 22; i += 1) {
+								for (var j = 0; j < 22; j += 1) {
 									timestamp /= 2;
 								}
 								// UNIX時刻(ミリ秒)
@@ -538,7 +769,7 @@ function createTableHTMLArray(organizedRecords) {
 		if (visibleStage.indexOf('' + hx) < 0) {
 			continue;
 		}
-		var stage = '<img src="./assets/img/stage/'+hx+'.png">';
+		var stage = '<img src="./assets/img/stage/'+hx+'.jpg">';
 		tableHTMLArray[0][hx + 1] = stage+'<p>'+srrManager.WORDS['stage-' + hx][LANG_KEY]+'</p>';
 	}
 
@@ -564,13 +795,29 @@ function createTableHTMLArray(organizedRecords) {
 			html += getMembersHTML(rec);
 			html += getRotationHTML(rec);
 			html += getLinksHTML(rec);
+			html += getLogHTML(rec);
 			if ('ties' in rec) {
 				html += '<div class="ties">';
-				for (var i = 0; i < rec.ties.length; i++) {
-					var tie = rec.ties[i];
-					html += getMembersHTML(tie);
-					html += getRotationHTML(tie);
-					html += getLinksHTML(tie);
+        var i, tie;
+				if (saveDataObj['omit-ties'] && rec.ties.length > 1) {
+					html += '<img class="omit-icon" on'+clickEvent+'="showOmittedTies(this);" src="./assets/img/update-log.png">';
+					html += '<div style="display: none;">';
+					for (i = 0; i < rec.ties.length; i++) {
+						tie = rec.ties[i];
+						html += getMembersHTML(tie);
+						html += getRotationHTML(tie);
+						html += getLinksHTML(tie);
+						if (i + 1 === rec.ties.length - 1) {
+							html += '</div>';
+						}
+					}
+				} else {
+					for (i = 0; i < rec.ties.length; i++) {
+						tie = rec.ties[i];
+						html += getMembersHTML(tie);
+						html += getRotationHTML(tie);
+						html += getLinksHTML(tie);
+					}
 				}
 				html += '</div>';
 			}
@@ -578,6 +825,14 @@ function createTableHTMLArray(organizedRecords) {
 		}
 	}
 	return tableHTMLArray;
+}
+
+
+/** showOmittedTies(self)
+ */
+function showOmittedTies(self) {
+	self.nextElementSibling.style.setProperty('display', 'block');
+	self.style.setProperty('display', 'none');
 }
 
 

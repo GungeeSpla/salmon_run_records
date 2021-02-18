@@ -1,3 +1,8 @@
+// ========================
+// SRRManager.js
+// ========================
+
+
 (function(google) {
 
 	// Google Visualization APIの読み込み
@@ -178,6 +183,30 @@
 		'record-29': {
 			'ja': '個人金（昼のみ）',
 			'en': 'Single Player Golden Eggs (No Night)'
+		},
+		'record-30': {
+			'ja': '総合金（夜0～2）',
+			'en': 'Total Golden Eggs (~2 Night)'
+		},
+		'record-31': {
+			'ja': '総合金（夜0～1）',
+			'en': 'Total Golden Eggs (~1 Night)'
+		},
+		'record-32': {
+			'ja': '総合金（夜0～2）',
+			'en': 'Total Golden Eggs (~2 Night)'
+		},
+		'record-33': {
+			'ja': '総合金（夜0～1）',
+			'en': 'Total Golden Eggs (~1 Night)'
+		},
+		'record-34': {
+			'ja': '総合赤 (昼のみ)',
+			'en': 'Total Power Eggs (No Night)'
+		},
+		'record-35': {
+			'ja': '個人赤 (昼のみ)',
+			'en': 'Single Player Power Eggs (No Night)'
 		},
 		'weapon-0': {
 			'ja': 'ボールドマーカー',
@@ -492,7 +521,6 @@
 		});
 	}
 
-
 	/** getCSV(opt)
 	 * CSVファイルを取得するプロミスを返します。
 	 * awaitを付けてこの関数を呼べば、データ取得の完了を待つことができます。
@@ -504,7 +532,7 @@
 	 */
 	function getCSV(opt, callback) {
 		var xhr = new XMLHttpRequest();
-		xhr.open('GET', './assets/csv/' + opt.sheet + '.csv?ver=' + CSV_VERSION, true);
+		xhr.open('GET', './assets/csv/For Salmon Run Records - ' + opt.sheet + '.csv?ver=' + CSV_VERSION, true);
 		xhr.responseType = 'text';
 		xhr.onreadystatechange = function (event) {
 			if (xhr.readyState === 4) {
@@ -584,6 +612,70 @@
 		return this;
 	};
 
+	/** .getRecordsOneCategory(_rotationType)
+	 */
+	SRRManager.prototype.getRecordsOneCategory = function(_rotationType, stageId, recordId) {
+
+		// 最終的に表示するデータ
+		var records = {};
+
+		// オプションを初期値に統合
+		var rotationType = Object.assign({
+			'rotation-normal': false,
+			'rotation-green-mystery-one': false,
+			'rotation-green-mystery-all': false,
+			'rotation-golden-mystery': false,
+		}, _rotationType);
+
+		var records = [];
+		var oldScore = -1;
+		for (var i = 0; i < this.rowRecords.length; i++) {
+			var rec = this.rowRecords[i];
+
+			// ステージID、レコードID、スコアのいずれかひとつでも数値に変換できなければこのレコードは無効
+			// for文を抜けてしまっていい
+			if (isNaN(parseInt(rec['stage id'])) || isNaN(parseInt(rec['record id'])) || isNaN(parseInt(rec.score))) {
+				break;
+			}
+
+			// 編成種別を取得
+			var rotationId = parseInt(rec['rotation id']);
+			var rotationKind = parseInt((!isNaN(rotationId)) ?
+				this.rotations[rotationId - 1].kind :
+				ROTATION_KIND_UNKNOWN);
+
+			// 金ランダム編成にチェックが入っておらず、このレコードが金ランダム編成のものならば、無視
+			if (!rotationType['rotation-golden-mystery'] && rotationKind === ROTATION_KIND_GOLDEN_MYSTERY) {
+				continue;
+			}
+
+			// 一緑ランダム編成にチェックが入っておらず、このレコードが一緑ランダム編成のものならば、無視
+			if (!rotationType['rotation-green-mystery-one'] && rotationKind === ROTATION_KIND_GREEN_MYSTERY_ONE) {
+				continue;
+			}
+
+			// 全緑ランダム編成にチェックが入っておらず、このレコードが全緑ランダム編成のものならば、無視
+			if (!rotationType['rotation-green-mystery-all'] && rotationKind === ROTATION_KIND_GREEN_MYSTERY_ALL) {
+				continue;
+			}
+
+			// 通常編成にチェックが入っておらず、このレコードが通常編成（あるいは編成不明）のものならば、無視
+			if (!rotationType['rotation-normal'] && (rotationKind === ROTATION_KIND_NORMAL || rotationKind === ROTATION_KIND_UNKNOWN)) {
+				continue;
+			}
+
+			if (stageId === parseInt(rec['stage id']) && recordId === parseInt(rec['record id'])) {
+				var score = parseInt(rec.score);
+				if (score >= oldScore) {
+					records.push(rec);
+					oldScore = score;
+				}
+			}
+		}
+
+		return records;
+	};
+
 	/** .getRecords(_rotationType)
 	 * Spreadsheetから引っ張ってきた、過去すべての生のRecordオブジェクトが格納されている
 	 * 配列(rowRecords)を使用して、実際にSalmon Run Recordsとして表示するテーブルデータを作成します。
@@ -619,9 +711,7 @@
 
 			// ステージID、レコードID、スコアのいずれかひとつでも数値に変換できなければこのレコードは無効
 			// for文を抜けてしまっていい
-			if (isNaN(parseInt(rec['stage id'])) ||
-					isNaN(parseInt(rec['record id'])) ||
-					isNaN(parseInt(rec.score))) {
+			if (isNaN(parseInt(rec['stage id'])) || isNaN(parseInt(rec['record id'])) || isNaN(parseInt(rec.score))) {
 				break;
 			}
 
