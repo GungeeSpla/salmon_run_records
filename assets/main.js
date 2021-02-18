@@ -377,6 +377,14 @@ function showUpdateLog(stageId, recordId) {
 	$modalUpdateLog.classList.remove('hidden');
 	document.body.classList.add('body-fix-for-update-log');
 	$modalUpdateLog.scrollTop = 0;
+	Array.prototype.forEach.call($modalUpdateLog.querySelectorAll('.members'), function($p) {
+		$p.style.setProperty('max-width', 'initial');
+	});
+	setTimeout(function() {
+		Array.prototype.forEach.call($modalUpdateLog.querySelectorAll('.members'), function($p) {
+			$p.style.setProperty('max-width', '20em');
+		});
+	}, 10)
 }
 
 
