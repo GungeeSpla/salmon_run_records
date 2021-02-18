@@ -17,6 +17,12 @@
 	// 「その種目とセットで更新確認をすべき種目」たち
 	// たとえば「野良3総合赤の記録が、総合赤の記録をも塗り替えていやしないか？」とチェックをするためのもの
 	var UPDATE_TOGETHER = {
+		'1': [31, 30, 0],
+		'31': [30, 0],
+		'30': [0],
+		'29': [33, 32, 3],
+		'33': [32, 3],
+		'32': [3],
 		'26': 24,
 		'27': 25,
 		'28': 24,
@@ -752,7 +758,13 @@
 			var keys = [key1];
 
 			if (recordId in UPDATE_TOGETHER) {
-				keys.push(stageId + '-' + UPDATE_TOGETHER[recordId]);
+				if (Array.isArray(UPDATE_TOGETHER[recordId])) {
+					UPDATE_TOGETHER[recordId].forEach(function(id) {
+						keys.push(stageId + '-' + id);
+					});
+				} else {
+					keys.push(stageId + '-' + UPDATE_TOGETHER[recordId]);
+				}
 			}
 
 			for (var j = 0; j < keys.length; j++) {
