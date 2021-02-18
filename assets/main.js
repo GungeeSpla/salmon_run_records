@@ -124,6 +124,11 @@ var scrollTarget;
 window.addEventListener('DOMContentLoaded', function() {
 	console.log('Event: DOMContentLoaded');
 
+	// @see https://qiita.com/ryounagaoka/items/045b2808a5ed43f96607
+	if (window.screen.width < 600) {
+	    document.getElementsByName('viewport')[0].setAttribute('content', 'width=' + 600 + ',initial-scale=1');
+	}
+
 	// DOM要素を取得
 	$recordTableArea = document.getElementById('record-table-area');
 	$recordTableWrapper = document.getElementById('record-table-wrapper');

@@ -199,12 +199,12 @@
 			'en': 'Total Golden Eggs (~1 Night)'
 		},
 		'record-32': {
-			'ja': '総合金（夜0～2）',
-			'en': 'Total Golden Eggs (~2 Night)'
+			'ja': '個人金（夜0～2）',
+			'en': 'Single Player Golden Eggs (~2 Night)'
 		},
 		'record-33': {
-			'ja': '総合金（夜0～1）',
-			'en': 'Total Golden Eggs (~1 Night)'
+			'ja': '個人金（夜0～1）',
+			'en': 'Single Player Golden Eggs (~1 Night)'
 		},
 		'record-34': {
 			'ja': '総合赤 (昼のみ)',
