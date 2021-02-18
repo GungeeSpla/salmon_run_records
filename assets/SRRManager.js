@@ -17,12 +17,12 @@
 	// 「その種目とセットで更新確認をすべき種目」たち
 	// たとえば「野良3総合赤の記録が、総合赤の記録をも塗り替えていやしないか？」とチェックをするためのもの
 	var UPDATE_TOGETHER = {
-		'1' : [31, 30, 0],
-		'31': [30, 0],
 		'30': [0],
-		'29': [33, 32, 3],
-		'33': [32, 3],
+		'31': [30, 0],
+		'1' : [31, 30, 0],
 		'32': [3],
+		'33': [32, 3],
+		'29': [33, 32, 3],
 		'26': 24,
 		'27': 25,
 		'28': 24,
@@ -777,21 +777,21 @@
 					var oldEggs = parseInt(records[key].score);
 					if (newEggs > oldEggs) {
 						// 更新していれば置換する
-						records[key] = rec;
+						records[key] = Object.assign({}, rec);
 					} else if (newEggs === oldEggs) {
 						// タイ記録ならばtiesプロパティに配列を作って格納する
 						// あるいはすでに存在しているties配列にpushする
 						if ('ties' in records[key]) {
-							if (records[key].ties[ records[key].ties.length-1 ].id !== rec.id) {
-								records[key].ties.push(rec);
-							}
+							//if (records[key].ties[ records[key].ties.length-1 ].id !== rec.id) {
+								records[key].ties.push( Object.assign({}, rec) );
+							//}
 						} else {
-							records[key].ties = [rec];
+							records[key].ties = [ Object.assign({}, rec) ];
 						}
 					}
 				} else {
 					// プロパティがまだ存在していないならば単に代入する
-					records[key] = rec;
+					records[key] = Object.assign({}, rec);
 				}
 			}
 		}
