@@ -75,7 +75,7 @@ var DEFAULT_SAVEDATA = {
  * 赤イクラ記録の種目IDたち
  * これに該当する種目は、イクラの前に赤イクラアイコンを付ける
  */
-var POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28];
+var POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28, 34, 35];
 
 
 /** FQDN_ICON_TYPES
