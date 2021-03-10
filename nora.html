@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title class="for-translation" en-text="Salmon Run Frozen Records">Salmon Run Frozen Records</title>
+	<meta name="description" content="集計が中止されたサーモンランの記録集です。" />
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src="./assets/SRRManager.js?ver=22"></script>
+	<script type="text/javascript" src="./assets/main.js?ver=22"></script>
+	<script type="text/javascript" src="./assets/kanaToRoman.js?ver=20"></script>
+	<script>
+		var RECORD_ORDER = [
+			5, 7, 26, 27, 28
+		];
+	</script>
+	<link rel="stylesheet" type="text/css" href="./assets/style.css?ver=20" />
+	<meta name="twitter:card"        content="summary" />
+	<meta name="twitter:site"        content="@GungeeSpla" />
+	<meta name="twitter:title"       content="Salmon Run Frozen Records" />
+	<meta name="twitter:description" content="集計が中止されたサーモンランの記録集です。" />
+	<meta name="twitter:image"       content="https://gungeespla.github.io/salmon_run_records/assets/img/twitter-card.png" />
+  <link rel="icon" type="image/png" href="./assets/img/twitter-card.png">
+</head>
+<body>
+	<div id="header"><p class="for-translation" en-text="Salmon Run Frozen Records">Salmon Run Frozen Records</p></div>
+	<div id="content">
+		<h3><span class="for-translation" en-text="Weapon Set">ブキ編成</span></h3>
+		<ul class="ul-options">
+			<li><input type="checkbox" class="for-save for-update-table" id="rotation-normal"><label for="rotation-normal" class="for-translation" en-text="Normal Weapons">通常編成</label></li>
+			<li><input type="checkbox" class="for-save for-update-table" id="rotation-green-mystery-one"><label for="rotation-green-mystery-one" class="for-translation" en-text="One Green Mystery">一緑ランダム編成</label></li>
+			<li><input type="checkbox" class="for-save for-update-table" id="rotation-green-mystery-all"><label for="rotation-green-mystery-all" class="for-translation" en-text="All Green Mystery">全緑ランダム編成</label></li>
+			<li><input type="checkbox" class="for-save for-update-table" id="rotation-golden-mystery"><label for="rotation-golden-mystery" class="for-translation" en-text="All Golden Mystery">金ランダム編成</label></li>
+		</ul>
+		<h3><span class="for-translation" en-text="Display Item">表示項目</span></h3>
+		<ul class="ul-options">
+			<li><input type="checkbox" class="for-save for-update-table-class" toggle-class="visible-eggs" id="display-item-eggs"><label for="display-item-eggs" class="for-translation" en-text="Eggs">イクラの個数</label></li>
+			<li><input type="checkbox" class="for-save for-update-table-class" toggle-class="visible-members" id="display-item-members"><label for="display-item-members" class="for-translation" en-text="Members">メンバー</label></li>
+			<li><input type="checkbox" class="for-save for-update-table-class" toggle-class="visible-rotation" id="display-item-rotation"><label for="display-item-rotation" class="for-translation" en-text="Weapons">ブキ編成</label></li>
+			<li><input type="checkbox" class="for-save for-update-table-class" toggle-class="visible-links" id="display-item-links"><label for="display-item-links" class="for-translation" en-text="Links">リンク</label></li>
+			<li><input type="checkbox" class="for-save for-update-table-class" toggle-class="visible-ties" id="display-item-ties"><label for="display-item-ties" class="for-translation" en-text="Ties">タイ記録</label></li>
+			<li><input type="checkbox" class="for-save for-update-table-class" id="display-update-log" toggle-class="visible-update-log"><label for="display-update-log" class="for-translation" en-text="Update Log">更新履歴</label></li>			
+		</ul>
+		<h3><span class="for-translation" en-text="Stage">ステージ</span></h3>
+		<ul class="ul-options">
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="01234" id="radio-stage-all"><label for="radio-stage-all" class="for-translation" en-text="All Stage">全ステージ</label></li>
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="0" id="radio-stage-0"><label for="radio-stage-0" class="for-translation" en-text="Spawning Grounds">シェケナダム</label></li>
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="1" id="radio-stage-1"><label for="radio-stage-1" class="for-translation" en-text="Marooner's Bay">難破船ドン･ブラコ</label></li>
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="2" id="radio-stage-2"><label for="radio-stage-2" class="for-translation" en-text="Lost Outpost">海上集落シャケト場</label></li>
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="3" id="radio-stage-3"><label for="radio-stage-3" class="for-translation" en-text="Salmonid Smokeyard">トキシラズいぶし工房</label></li>
+			<li><input type="radio" name="visible-stage" class="for-save for-update-table" value="4" id="radio-stage-4"><label for="radio-stage-4" class="for-translation" en-text="Ruins of Ark Polaris">朽ちた箱舟 ポラリス</label></li>
+		</ul>
+		<div id="record-table-area">
+			<div id="record-table-wrapper">
+				<table id="record-table" class="record-table"><tr><th class="border-none" style="padding-top: 2rem;"><span style="font-weight: normal;" class="for-translation" en-text="Accessing the sheet...">レコードを取得しています…</span></th></tr></table>
+			</div>
+		</div>
+		<h3><span class="for-translation" en-text="Other Settings">その他の設定</span></h3>
+		<ul class="ul-options-2">
+			<li><input type="checkbox" class="for-save for-update-table" id="change-roman"><label for="change-roman" class="for-translation" en-text="Change Japanese player names to Roman characters">プレイヤーの名前をローマ字で表記する</label></li>
+			<li><input type="checkbox" class="for-save for-update-table" id="omit-ties"><label for="omit-ties" class="for-translation" en-text="Omit the tie records">タイ記録を省略表示する</label></li>
+			<li><input type="checkbox" class="for-save for-update-body-class" id="fix-thead" toggle-class="fix-thead"><label for="fix-thead" class="for-translation" en-text="Fix stages and categories">ステージとカテゴリーを固定表示する</label></li>
+		</ul>
+		<h3><span class="for-translation" en-text="About">Salmon Run Records について</span></h3>
+		<div id="about">
+			<p><a href="https://gungeespla.github.io/salmon_run_records/">Salmon Run Records</a><span class="for-translation" en-text=" is managed by a volunteer Twitter user.">は、有志のTwitterユーザーによってまとめられたサーモンランの記録シートです。</span></p>
+			<p><span class="for-translation" en-text="Sameet invented this sheet in the summer of 2018, and Marty, Ciel and others helped manage the sheet. Currently, ">2018年の夏頃にSameetがこのシートを考案し、MartyやCielが管理を手伝いました。その影響で、このシートは「マーティーシート」と呼ばれることがあります。現在は、</span><a href="https://twitter.com/GungeeSpla">@GungeeSpla</a><span class="for-translation" en-text=" manages the sheet.">がシートを管理しています。</span></p>
+			<p><span class="for-translation" en-text="Check ">かつてのスプレッドシートは</span><a href="https://docs.google.com/spreadsheets/d/14x39JwJzgGJxFuN7UTQtIqbHJCQfHrYWCHgYzeLiook/edit?usp=sharing" target="_blank"><span class="for-translation" en-text="here">こちら</span></a><span class="for-translation" en-text=" to look at the former original spreadsheet.">から確認できます。</span></p>
+			<p><span class="for-translation" en-text="In the past, normal weapons, one-green and all-green rotations were managed together as &quot;normal rotations&quot;. But it was subdivided effective July 14, 2020. So some of the records are forgotten.">かつては、通常編成・一緑ランダム編成・全緑ランダム編成をまとめて「通常編成」として管理していましたが、2020年7月14日から細分化しました。そのため、本来あったはずの記録がいくつか抜け落ちていることと思います。</span></p>
+		</div>
+	</div>
+	<div id="footer"></div>
+	<div id="modal-update-log" class="hidden">
+		<div id="modal-update-log-table" class="record-table">
+		</div>
+		<p id="modal-update-log-close">×</p>
+		<p id="modal-update-log-footer" class="for-translation" en-text="Click here to close.">クリックして閉じる</p>
+	</div>
+	<div id="modal-rotation" class="hidden">
+		<div id="modal-rotation-inner">
+			<h5></h5>
+			<div class="rotation-content">
+				<div class="rotation-stage">
+					<img src="./assets/img/stage/0.png">
+					<p></p>
+				</div>
+				<div class="rotation-weapons">
+					<p class="for-translation" en-text="Supplied Weapons">支給ブキ</p>
+					<ul>
+						<li><img class="weapon-image" src="./assets/img/weapon/0.png"></li>
+						<li><img class="weapon-image" src="./assets/img/weapon/0.png"></li>
+						<li><img class="weapon-image" src="./assets/img/weapon/0.png"></li>
+						<li><img class="weapon-image" src="./assets/img/weapon/0.png"></li>
+						<li><img class="weapon-image" src="./assets/img/weapon/0.png"></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<p id="modal-rotation-footer" class="for-translation" en-text="Click here to close.">クリックして閉じる</p>
+	</div>
+</body>
+</html>

@@ -21,6 +21,7 @@ window.wordToRoman = (function() {
 		'がずー': 'Gazooo',
 		'カトレア': 'Cattleya',
 		'かんぞうぽんこつ': 'Kanzo-Ponkotsu',
+		'ガンジー': 'Gungee',
 		'きつねそば': 'Kitsune-Soba',
 		'くっきー': 'Cookie',
 		'ケフィァ': 'Kefia',
