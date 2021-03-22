@@ -380,6 +380,9 @@ a:hover {
 			.record-table .breakdown {
 				color: yellow;
 				display: none;
+				width: max-content;
+				max-width: 14em;
+				margin: auto;
 			}
 			.record-table.visible-breakdown .breakdown {
 				display: block;

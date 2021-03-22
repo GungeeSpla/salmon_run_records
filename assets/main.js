@@ -108,6 +108,26 @@ var FQDN_ICON_TYPES = {
 };
 
 
+var EVENT_LANG = {
+	'通常昼': 'NT Day',
+	'満潮昼': 'HT Day',
+	'干潮昼': 'LT Day',
+	'通常ラッシュ': 'NT Rush',
+	'満潮ラッシュ': 'HT Rush',
+	'通常霧': 'NT Fog',
+	'満潮霧': 'HT Fog',
+	'干潮霧': 'LT Fog',
+	'通常間欠泉': 'NT Gushers',
+	'満潮間欠泉': 'HT Gushers',
+	'通常グリル': 'NT Grillers',
+	'満潮グリル': 'HT Grillers',
+	'通常ハコビヤ': 'NT Mothership',
+	'満潮ハコビヤ': 'HT Mothership',
+	'干潮ハコビヤ': 'LT Mothership',
+	'干潮ドスコイ': 'LT Cannon',
+};
+
+
 /** その他のインスタンス
  */
 var isTouchDevice;
@@ -643,9 +663,15 @@ function getScoreHTML(rec) {
 function getBreakdownHTML(rec) {
 	if (BREAKDOWN_RECORD_IDS.includes(parseInt(rec['record id']))) {
 		var html = '<p class="breakdown">';
-		html += '<span>'+rec['wave 1']+rec['egg 1']+',</span> ';
-		html += '<span>'+rec['wave 2']+rec['egg 2']+',</span> ';
-		html += '<span>'+rec['wave 3']+rec['egg 3']+'</span>';
+		if (LANG_KEY === 'en') {
+			html += EVENT_LANG[rec['wave 1']]+' '+rec['egg 1']+', ';
+			html += EVENT_LANG[rec['wave 2']]+' '+rec['egg 2']+', ';
+			html += EVENT_LANG[rec['wave 3']]+' '+rec['egg 3'];
+		} else {
+			html += rec['wave 1']+rec['egg 1']+', ';
+			html += rec['wave 2']+rec['egg 2']+', ';
+			html += rec['wave 3']+rec['egg 3'];
+		}
 		html += '</p>';
 		return html;
 	} else {
