@@ -125,6 +125,7 @@ var EVENT_LANG = {
 	'満潮ハコビヤ': 'HT Mothership',
 	'干潮ハコビヤ': 'LT Mothership',
 	'干潮ドスコイ': 'LT Cannon',
+	'?': '?'
 };
 
 
