@@ -12,7 +12,7 @@
 	var URL_BASE = 'https://docs.google.com/spreadsheets/d';
 
 	// スプレッドシートのID
-	var SHEET_KEY = '1v-OCTcqyj_mEgxityyfAWCfT2_2IueRrtsGItYPZCMU';
+	var SHEET_KEY = window.SHEET_KEY || '1v-OCTcqyj_mEgxityyfAWCfT2_2IueRrtsGItYPZCMU';
 
 	// 「その種目とセットで更新確認をすべき種目」たち
 	// たとえば「野良3総合赤の記録が、総合赤の記録をも塗り替えていやしないか？」とチェックをするためのもの
@@ -670,7 +670,23 @@
 				continue;
 			}
 
-			if (stageId === parseInt(rec['stage id']) && recordId === parseInt(rec['record id'])) {
+			var theRecId = rec['record id'];
+			var isMatched = (recordId === parseInt(theRecId));
+			if (!isMatched && (theRecId in UPDATE_TOGETHER)) {
+				if (Array.isArray(UPDATE_TOGETHER[theRecId])) {
+					UPDATE_TOGETHER[rec['record id']].forEach(function(id) {
+						if (recordId === id) {
+							isMatched = true;
+						}
+					});
+				} else {
+					if (recordId === UPDATE_TOGETHER[theRecId]) {
+						isMatched = true;
+					}
+				}
+			}
+
+			if (stageId === parseInt(rec['stage id']) && isMatched) {
 				var score = parseInt(rec.score);
 				if (score >= oldScore) {
 					records.push(rec);
@@ -678,6 +694,31 @@
 				}
 			}
 		}
+
+		records.sort(function(a, b) {
+			var score1 = parseInt(a.score);
+			var score2 = parseInt(b.score);
+			if (score1 !== score2) {
+				if (score1 < score2) {
+					return -1;
+				} else {
+					return 1;
+				}
+			} else {
+				var time1 = new Date(a.date).getTime();
+				var time2 = new Date(b.date).getTime();
+				if (isNaN(time1) || isNaN(time2)) {
+					return -1;
+				} else {
+					if (time1 < time2) {
+						return -1;
+					} else {
+						return 1;
+					}
+				}
+				return 1;
+			}
+		});
 
 		return records;
 	};
@@ -823,13 +864,14 @@
 			get({
 				key: SHEET_KEY,
 				sheet: 'Records',
-				range: 'A1:J' + (recordCount + 1),
+				range: 'A1:P' + (recordCount + 1),
 				array: self.rowRecords
 			}, function(lines) {
 				console.log('▼ レコードを取得しました。%o', lines);
 				self.rowRecords.forEach(function(rec, i) {
 					rec.id = i;
 				});
+				test(self.rowRecords);
 				get({
 					key: SHEET_KEY,
 					sheet: 'Rotations',
@@ -845,5 +887,34 @@
 		});
 		return this;
 	};
+
+	function test(records) {
+		/*
+		records.forEach(function(rec) {
+			if (rec['record id'] === '3' || rec['record id'] === '32' || rec['record id'] === '33') {
+				var nightCount = 0;
+				if (!rec['wave 1'].includes('昼')) nightCount++;
+				if (!rec['wave 2'].includes('昼')) nightCount++;
+				if (!rec['wave 3'].includes('昼')) nightCount++;
+				var isOK = false;
+				switch (rec['record id']) {
+					case '0':
+						if (nightCount === 3) isOK = true;
+						break;
+					case '30':
+						if (nightCount === 2) isOK = true;
+						break;
+					case '31':
+						if (nightCount === 1) isOK = true;
+						break;
+				}
+				if (!isOK) {
+					console.log(rec);
+				}
+			}
+		});
+		*/
+	}
+
 	window.SRRManager = SRRManager;
 })(window.google);

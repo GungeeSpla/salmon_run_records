@@ -36,7 +36,7 @@ var STAGE_COUNT = 5;
 /** RECORD_ORDER
  * 表示する記録カテゴリのリスト
  */
-var RECORD_ORDER = [
+var RECORD_ORDER = window.RECORD_ORDER || [
 	0, 30, 31, 1,
 	3, 32, 33, 29,
 	4, 6,
@@ -54,6 +54,8 @@ var DEFAULT_SAVEDATA = {
 	'display-item-members': true,
 	'display-item-rotation': true,
 	'display-item-ties': true,
+	'display-item-ties': true,
+	'display-item-breakdown': true,
 	'display-update-log': true,
 	'radio-stage-0': false,
 	'radio-stage-1': false,
@@ -76,6 +78,12 @@ var DEFAULT_SAVEDATA = {
  * これに該当する種目は、イクラの前に赤イクラアイコンを付ける
  */
 var POWER_EGGS_RECORD_IDS = [24, 25, 26, 27, 28, 34, 35];
+
+
+/** BREAKDOWN_RECORD_IDS
+ * これに該当する種目は、内訳を表示する
+ */
+var BREAKDOWN_RECORD_IDS = [0, 30, 31, 1, 3, 32, 33, 29];
 
 
 /** FQDN_ICON_TYPES
@@ -366,6 +374,7 @@ function showUpdateLog(stageId, recordId) {
 		}
 		html += '<li>';
 		html += getScoreHTML(rec);
+		html += getBreakdownHTML(rec);
 		html += getMembersHTML(rec);
 		html += getRotationHTML(rec);
 		html += getLinksHTML(rec);
@@ -629,6 +638,22 @@ function getScoreHTML(rec) {
 }
 
 
+/** getBreakdownHTML(rec)
+ */
+function getBreakdownHTML(rec) {
+	if (BREAKDOWN_RECORD_IDS.includes(parseInt(rec['record id']))) {
+		var html = '<p class="breakdown">';
+		html += '<span>'+rec['wave 1']+rec['egg 1']+',</span> ';
+		html += '<span>'+rec['wave 2']+rec['egg 2']+',</span> ';
+		html += '<span>'+rec['wave 3']+rec['egg 3']+'</span>';
+		html += '</p>';
+		return html;
+	} else {
+		return '';
+	}
+}
+
+
 /** getMembersHTML(rec)
  */
 function getMembersHTML(rec) {
@@ -669,8 +694,8 @@ function getRotationHTML(rec) {
 
 /** getLogHTML(rec)
  */
-function getLogHTML(rec) {
-	var logHTML = '<img src="./assets/img/update-log.png" class="update-log" on'+clickEvent+'="showUpdateLog('+rec['stage id']+', '+rec['record id']+');" stage-id="'+rec['stage id']+'" record-id="'+rec['record id']+'">';
+function getLogHTML(rec, n) {
+	var logHTML = '<img src="./assets/img/update-log.png" class="update-log" on'+clickEvent+'="showUpdateLog('+rec['stage id']+', '+n+');" stage-id="'+rec['stage id']+'" record-id="'+rec['record id']+'">';
 	return logHTML;
 }
 
@@ -754,7 +779,7 @@ function getLinksHTML(rec) {
 		});
 		return '<p class="links">'+linksHTML+'</p>';
 	} else {
-		return '';
+		return '<p style="height: .7rem;"> </p>';
 	}
 }
 
@@ -805,10 +830,11 @@ function createTableHTMLArray(organizedRecords) {
 			}
 			var html = '';
 			html += getScoreHTML(rec);
+			html += getBreakdownHTML(rec);
 			html += getMembersHTML(rec);
 			html += getRotationHTML(rec);
 			html += getLinksHTML(rec);
-			html += getLogHTML(rec);
+			html += getLogHTML(rec, n);
 			if ('ties' in rec) {
 				html += '<div class="ties">';
         var i, tie;
@@ -817,6 +843,7 @@ function createTableHTMLArray(organizedRecords) {
 					html += '<div style="display: none;">';
 					for (i = 0; i < rec.ties.length; i++) {
 						tie = rec.ties[i];
+						html += getBreakdownHTML(tie);
 						html += getMembersHTML(tie);
 						html += getRotationHTML(tie);
 						html += getLinksHTML(tie);
@@ -827,6 +854,7 @@ function createTableHTMLArray(organizedRecords) {
 				} else {
 					for (i = 0; i < rec.ties.length; i++) {
 						tie = rec.ties[i];
+						html += getBreakdownHTML(tie);
 						html += getMembersHTML(tie);
 						html += getRotationHTML(tie);
 						html += getLinksHTML(tie);

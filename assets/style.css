@@ -377,6 +377,13 @@ a:hover {
 			.record-table .p-eggs {
 				color: #ff9800;
 			}
+			.record-table .breakdown {
+				color: yellow;
+				display: none;
+			}
+			.record-table.visible-breakdown .breakdown {
+				display: block;
+			}
 			.record-table.visible-eggs .p-eggs,
 			.record-table.visible-eggs .eggs {
 				display: block;
