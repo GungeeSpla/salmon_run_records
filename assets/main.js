@@ -686,13 +686,19 @@ function getBreakdownHTML(rec) {
 function getMembersHTML(rec) {
 	var membersHTML = '';
 	if (saveDataObj['change-roman']) {
+		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_crown.png">';
 		if (rec['member 1']) membersHTML += window.wordToRoman(rec['member 1']);
-		if (rec['member 2']) membersHTML += ' ' + window.wordToRoman(rec['member 2']);
+		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_shield.png">';
+		else membersHTML += ' ';
+		if (rec['member 2']) membersHTML += window.wordToRoman(rec['member 2']);
 		if (rec['member 3']) membersHTML += ' ' + window.wordToRoman(rec['member 3']);
 		if (rec['member 4']) membersHTML += ' ' + window.wordToRoman(rec['member 4']);
 	} else {
+		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_crown.png">';
 		if (rec['member 1']) membersHTML += rec['member 1'];
-		if (rec['member 2']) membersHTML += ' ' + rec['member 2'];
+		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_shield.png">';
+		else membersHTML += ' ';
+		if (rec['member 2']) membersHTML += rec['member 2'];
 		if (rec['member 3']) membersHTML += ' ' + rec['member 3'];
 		if (rec['member 4']) membersHTML += ' ' + rec['member 4'];
 	}

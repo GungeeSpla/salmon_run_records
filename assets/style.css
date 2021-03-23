@@ -482,6 +482,15 @@ a:hover {
 			    max-width: 14em;
 			    margin: auto;
 			}
+			.record-table .members img {
+				width: 1rem;
+				vertical-align: baseline;
+				transform: translateY(.1rem);
+				margin-right: .2rem;
+			}
+			.record-table .members img:nth-child(2) {
+				margin-left: .6rem;
+			}
 			#modal-update-log .members {
 			    max-width: 20em;
 			}
