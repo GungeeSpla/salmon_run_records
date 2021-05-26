@@ -167,12 +167,12 @@
 			'en': 'Cohock Charge'
 		},
 		'record-24': {
-			'ja': '総合赤',
-			'en': 'Total Power Eggs'
+			'ja': '総合赤（フレ4）<a href="#about-power" class="question"></a>',
+			'en': 'Total Power Eggs（No Freelance) <a href="#about-power" class="question"></a>',
 		},
 		'record-25': {
-			'ja': '個人赤',
-			'en': 'Single Player Power Eggs'
+			'ja': '個人赤（フレ4）<a href="#about-power" class="question"></a>',
+			'en': 'Single Player Power Eggss（No Freelance) <a href="#about-power" class="question"></a>',
 		},
 		'record-26': {
 			'ja': '野良3総合赤',
@@ -207,12 +207,12 @@
 			'en': 'Single Player Golden Eggs (~1 Night)'
 		},
 		'record-34': {
-			'ja': '総合赤 (昼のみ)',
-			'en': 'Total Power Eggs (No Night)'
+			'ja': '総合赤 (昼のみ、フレ4) <a href="#about-power" class="question"></a>',
+			'en': 'Total Power Eggs (No Night, No Freelance) <a href="#about-power" class="question"></a>'
 		},
 		'record-35': {
-			'ja': '個人赤 (昼のみ)',
-			'en': 'Single Player Power Eggs (No Night)'
+			'ja': '個人赤 (昼のみ、フレ4) <a href="#about-power" class="question"></a>',
+			'en': 'Single Player Power Eggs (No Night, No Freelance) <a href="#about-power" class="question"></a>'
 		},
 		'weapon-0': {
 			'ja': 'ボールドマーカー',
