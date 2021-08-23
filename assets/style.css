@@ -496,6 +496,7 @@ a:hover {
 			}
 			.record-table.visible-members .members {
 				display: block;
+				word-break: keep-all;
 			}
 				.record-table .members span {
 					margin-right: .5em;
