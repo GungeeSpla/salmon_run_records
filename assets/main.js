@@ -33,6 +33,14 @@ var LANG_KEY = (LOCATION_QUERIES.lang === 'ja') ? 'ja' : (LOCATION_QUERIES.lang 
 var STAGE_COUNT = 5;
 
 
+/** PRINCESS_RECORD_IDS
+ * 個人金･赤の記録カテゴリのリスト
+ */
+var PRINCESS_RECORD_IDS = [
+	3, 32, 33, 29,
+];
+
+
 /** RECORD_ORDER
  * 表示する記録カテゴリのリスト
  */
@@ -41,7 +49,7 @@ var RECORD_ORDER = window.RECORD_ORDER || [
 	3, 32, 33, 29,
 	4, 6,
 	8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-	24, 34, 25, 35
+	/*24, 34, 25, 35*/
 ];
 
 
@@ -274,6 +282,10 @@ window.addEventListener('DOMContentLoaded', function() {
 		Array.prototype.forEach.call($transElements, function($elm) {
 			var txt = $elm.getAttribute('en-text');
 			$elm.textContent = txt;
+			var hrf = $elm.getAttribute('en-href');
+			if (hrf) {
+				$elm.setAttribute('href', hrf);
+			}
 		});
 	}
 
@@ -686,17 +698,17 @@ function getBreakdownHTML(rec) {
 function getMembersHTML(rec) {
 	var membersHTML = '';
 	if (saveDataObj['change-roman']) {
-		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_crown.png">';
+		if (MODE_PRINCESS || PRINCESS_RECORD_IDS.includes(parseInt(rec['record id']))) membersHTML += '<img src="./assets/img/emoji_crown.png">';
 		if (rec['member 1']) membersHTML += window.wordToRoman(rec['member 1']);
-		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_shield.png">';
+		if (MODE_PRINCESS || PRINCESS_RECORD_IDS.includes(parseInt(rec['record id']))) membersHTML += '<img src="./assets/img/emoji_shield.png">';
 		else membersHTML += ' ';
 		if (rec['member 2']) membersHTML += window.wordToRoman(rec['member 2']);
 		if (rec['member 3']) membersHTML += ' ' + window.wordToRoman(rec['member 3']);
 		if (rec['member 4']) membersHTML += ' ' + window.wordToRoman(rec['member 4']);
 	} else {
-		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_crown.png">';
+		if (MODE_PRINCESS || PRINCESS_RECORD_IDS.includes(parseInt(rec['record id']))) membersHTML += '<img src="./assets/img/emoji_crown.png">';
 		if (rec['member 1']) membersHTML += rec['member 1'];
-		if (MODE_PRINCESS) membersHTML += '<img src="./assets/img/emoji_shield.png">';
+		if (MODE_PRINCESS || PRINCESS_RECORD_IDS.includes(parseInt(rec['record id']))) membersHTML += '<img src="./assets/img/emoji_shield.png">';
 		else membersHTML += ' ';
 		if (rec['member 2']) membersHTML += rec['member 2'];
 		if (rec['member 3']) membersHTML += ' ' + rec['member 3'];
